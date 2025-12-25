@@ -39,15 +39,52 @@ export default function Home() {
         </button>
       </div>
 
+
+<!-- PORTFOLIO SECTION____________ -->
+
       {portfolio.length > 0 && (
         <div style={{ marginTop: "30px" }}>
           <h2>Portfolio</h2>
           <ul>
-            {portfolio.map((stock, index) => (
-              <li key={index} style={{ marginBottom: "12px" }}>
-                <strong>{stock.symbol}</strong> - ${stock.price} ({stock.change}%)
-              </li>
-            ))}
+            {portfolio.length > 0 && (
+  <div style={{ marginTop: "30px" }}>
+    <h2>Portfolio</h2>
+    <ul style={{ listStyle: "none", padding: 0 }}>
+      {portfolio.map((stock, index) => (
+        <li
+          key={index}
+          style={{
+            marginBottom: "12px",
+            padding: "12px",
+            border: "1px solid #ccc",
+            borderRadius: "8px",
+          }}
+        >
+          <strong>{stock.symbol}</strong> - ${stock.price} (
+          <span style={{ color: stock.change >= 0 ? "green" : "red" }}>
+            {stock.change}%
+          </span>
+          )
+        </li>
+      ))}
+    </ul>
+
+    {/* Total gains/losses */}
+    <div style={{ marginTop: "20px", fontSize: "18px" }}>
+      Total Change:{" "}
+      <span
+        style={{
+          color:
+            portfolio.reduce((acc, s) => acc + s.change, 0) >= 0
+              ? "green"
+              : "red",
+        }}
+      >
+        {portfolio.reduce((acc, s) => acc + s.change, 0).toFixed(2)}%
+      </span>
+    </div>
+  </div>
+)}
           </ul>
         </div>
       )}
