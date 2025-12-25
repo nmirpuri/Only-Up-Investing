@@ -8,18 +8,22 @@ export async function GET(req) {
     return NextResponse.json({ error: "Missing symbol" }, { status: 400 });
   }
 
-  // TEMP: mock data
-  const mockPrices = {
-    AAPL: 189.23,
-    TSLA: 810.5,
-    GOOGL: 135.1
-  };
+  try {
+    const apiKey = process.env.FINNHUB_API_KEY;
+    const res = await fetch(
+      `https://finnhub.io/api/v1/quote?symbol=${symbol.toUpperCase()}&token=${apiKey}`
+    );
 
-  const price = mockPrices[symbol.toUpperCase()] || 100;
+    const json = await res.json();
 
-  return NextResponse.json({
-    symbol: symbol.toUpperCase(),
-    price,
-    change: Math.round((Math.random() - 0.5) * 10 * 100) / 100 // random % change
-  });
+    // json.c = current price
+    // json.d = change
+    return NextResponse.json({
+      symbol: symbol.toUpperCase(),
+      price: json.c,
+      change: Math.round((json.d / json.pc) * 100 * 100) / 100 || 0, // % change
+    });
+  } catch (err) {
+    return NextResponse.json({ error: "Failed to fetch price" }, { status: 500 });
+  }
 }
