@@ -86,7 +86,7 @@ const gainLoss =
     >
       {/* Header */}
       <header style={{ textAlign: "center", marginBottom: "40px" }}>
-        <h1 style={{ fontSize: "48px", margin: 0 }}>Only Up</h1>
+        <h1 style={{ fontSize: "48px", margin: 0 }}>Only Up (Hi)</h1>
         <p style={{ fontSize: "18px", color: "#555" }}>
           Real-time portfolio tracking. Exact gains. No fluff.
         </p>
