@@ -10,20 +10,30 @@ export async function GET(req) {
 
   try {
     const apiKey = process.env.FINNHUB_API_KEY;
+
     const res = await fetch(
-      `https://finnhub.io/api/v1/quote?symbol=${symbol.toUpperCase()}&token=${apiKey}`
+      `https://finnhub.io/api/v1/quote?symbol=${symbol.toUpperCase()}&token=${apiKey}`,
+      { cache: "no-store" }
     );
 
-    const json = await res.json();
+    const data = await res.json();
 
-    // json.c = current price
-    // json.d = change
+    // Finnhub returns 0s when it fails
+    if (!data.c || data.c === 0) {
+      return NextResponse.json(
+        { error: "Invalid symbol or API limit reached" },
+        { status: 400 }
+      );
+    }
+
     return NextResponse.json({
       symbol: symbol.toUpperCase(),
-      price: json.c,
-      change: Math.round((json.d / json.pc) * 100 * 100) / 100 || 0, // % change
+      price: Number(data.c.toFixed(2)),
     });
   } catch (err) {
-    return NextResponse.json({ error: "Failed to fetch price" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to fetch stock price" },
+      { status: 500 }
+    );
   }
 }
