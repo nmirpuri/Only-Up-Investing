@@ -1,14 +1,19 @@
-"use client"; // needed for client-side interactivity
+"use client";
 import { useState } from "react";
 
 export default function Home() {
   const [symbol, setSymbol] = useState("");
-  const [data, setData] = useState(null);
+  const [portfolio, setPortfolio] = useState([]);
 
-  async function fetchPrice() {
+  async function addStock() {
+    if (!symbol) return;
+
     const res = await fetch(`/api/price?symbol=${symbol}`);
-    const json = await res.json();
-    setData(json);
+    const data = await res.json();
+
+    // Add new stock to portfolio
+    setPortfolio((prev) => [...prev, data]);
+    setSymbol("");
   }
 
   return (
@@ -27,18 +32,23 @@ export default function Home() {
           style={{ padding: "8px", fontSize: "16px" }}
         />
         <button
-          onClick={fetchPrice}
+          onClick={addStock}
           style={{ padding: "8px 12px", marginLeft: "8px", fontSize: "16px" }}
         >
           Add Stock
         </button>
       </div>
 
-      {data && (
-        <div style={{ marginTop: "20px" }}>
-          <p>Symbol: {data.symbol}</p>
-          <p>Price: ${data.price}</p>
-          <p>Change: {data.change}%</p>
+      {portfolio.length > 0 && (
+        <div style={{ marginTop: "30px" }}>
+          <h2>Portfolio</h2>
+          <ul>
+            {portfolio.map((stock, index) => (
+              <li key={index} style={{ marginBottom: "12px" }}>
+                <strong>{stock.symbol}</strong> - ${stock.price} ({stock.change}%)
+              </li>
+            ))}
+          </ul>
         </div>
       )}
     </main>
