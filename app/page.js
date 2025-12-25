@@ -41,36 +41,34 @@ export default function Home() {
 
 
 <!-- PORTFOLIO SECTION____________ -->
-
-      {portfolio.length > 0 && (
-        <div style={{ marginTop: "30px" }}>
-          <h2>Portfolio</h2>
-          <ul>
-            {portfolio.length > 0 && (
+<ul>
+{portfolio.length > 0 && (
   <div style={{ marginTop: "30px" }}>
-    <h2>Portfolio</h2>
-    <ul style={{ listStyle: "none", padding: 0 }}>
+    <h2 style={{ fontSize: "24px", marginBottom: "16px" }}>Portfolio</h2>
+    <div style={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
       {portfolio.map((stock, index) => (
-        <li
+        <div
           key={index}
           style={{
-            marginBottom: "12px",
-            padding: "12px",
-            border: "1px solid #ccc",
-            borderRadius: "8px",
+            padding: "16px",
+            borderRadius: "12px",
+            boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
+            minWidth: "180px",
+            flex: "1 1 180px",
+            backgroundColor: "#f9f9f9",
           }}
         >
-          <strong>{stock.symbol}</strong> - ${stock.price} (
-          <span style={{ color: stock.change >= 0 ? "green" : "red" }}>
-            {stock.change}%
-          </span>
-          )
-        </li>
+          <h3 style={{ margin: 0 }}>{stock.symbol}</h3>
+          <p style={{ margin: "8px 0" }}>Price: ${stock.price}</p>
+          <p style={{ margin: 0, color: stock.change >= 0 ? "green" : "red" }}>
+            Change: {stock.change}%
+          </p>
+        </div>
       ))}
-    </ul>
+    </div>
 
     {/* Total gains/losses */}
-    <div style={{ marginTop: "20px", fontSize: "18px" }}>
+    <div style={{ marginTop: "24px", fontSize: "18px" }}>
       Total Change:{" "}
       <span
         style={{
@@ -85,6 +83,7 @@ export default function Home() {
     </div>
   </div>
 )}
+
           </ul>
         </div>
       )}
