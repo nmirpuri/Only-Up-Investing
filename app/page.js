@@ -16,10 +16,17 @@ export default function Home() {
     if (!symbol || !boughtPrice || !shares) return;
 
     const data = await fetchPrice(symbol);
-    const currentPrice = data.price;
+    if (!data.price) {
+  alert("Could not fetch stock price. Try again later.");
+  return;
+}
 
-    const gainLoss =
-      (currentPrice - parseFloat(boughtPrice)) * parseFloat(shares);
+const currentPrice = Number(data.price);
+
+
+const gainLoss =
+  (currentPrice - Number(boughtPrice)) * Number(shares);
+
 
     setPortfolio((prev) => [
       ...prev,
