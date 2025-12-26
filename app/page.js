@@ -1,192 +1,333 @@
 "use client";
-import { useEffect, useState } from "react";
 
-export default function Home() {
-  const [symbol, setSymbol] = useState("");
-  const [boughtPrice, setBoughtPrice] = useState("");
-  const [shares, setShares] = useState("");
-  const [portfolio, setPortfolio] = useState([]);
+import { useState, useEffect } from "react";
 
-  async function fetchPrice(stockSymbol) {
-    const res = await fetch(`/api/price?symbol=${stockSymbol}`);
-    return res.json();
-  }
-
-  async function addStock() {
-    if (!symbol || !boughtPrice || !shares) return;
-
-    const data = await fetchPrice(symbol);
-    if (!data.price) {
-  alert("Could not fetch stock price. Try again later.");
-  return;
+/* ============================
+   HELPERS
+============================ */
+function generateAnonId() {
+  return "anon_" + crypto.randomUUID();
 }
 
-const currentPrice = Number(data.price);
+export default function Home() {
+  const [userId, setUserId] = useState(null);
+  const [symbol, setSymbol] = useState("");
+  const [buyPrice, setBuyPrice] = useState("");
+  const [shares, setShares] = useState("");
+  const [portfolio, setPortfolio] = useState([]);
+  const [error, setError] = useState("");
+  const [loadingPrices, setLoadingPrices] = useState(false);
 
+  /* ============================
+     INIT ANONYMOUS USER
+  ============================ */
+  useEffect(() => {
+    let storedUserId = localStorage.getItem("onlyup-user-id");
 
-const gainLoss =
-  (currentPrice - Number(boughtPrice)) * Number(shares);
+    if (!storedUserId) {
+      storedUserId = generateAnonId();
+      localStorage.setItem("onlyup-user-id", storedUserId);
+    }
 
+    setUserId(storedUserId);
+
+    const saved = localStorage.getItem("onlyup-portfolio");
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (parsed.userId === storedUserId) {
+        setPortfolio(parsed.stocks || []);
+      }
+    }
+  }, []);
+
+  /* ============================
+     SAVE PORTFOLIO
+  ============================ */
+  useEffect(() => {
+    if (!userId) return;
+
+    localStorage.setItem(
+      "onlyup-portfolio",
+      JSON.stringify({
+        userId,
+        stocks: portfolio,
+      })
+    );
+  }, [portfolio, userId]);
+
+  /* ============================
+     FETCH STOCK PRICE
+  ============================ */
+  async function fetchPrice(stock) {
+    try {
+      const res = await fetch(`/api/stock?symbol=${stock}`);
+      const data = await res.json();
+      return data.price;
+    } catch {
+      return null;
+    }
+  }
+
+  /* ============================
+     ADD STOCK
+  ============================ */
+  async function addStock() {
+    setError("");
+
+    if (!symbol || !buyPrice || !shares) {
+      setError("Fill all fields.");
+      return;
+    }
+
+    const price = await fetchPrice(symbol.toUpperCase());
+
+    if (!price) {
+      setError("Could not fetch stock price.");
+      return;
+    }
 
     setPortfolio((prev) => [
       ...prev,
       {
+        id: crypto.randomUUID(),
         symbol: symbol.toUpperCase(),
-        boughtPrice: parseFloat(boughtPrice),
-        shares: parseFloat(shares),
-        currentPrice,
-        gainLoss,
+        buyPrice: Number(buyPrice),
+        shares: Number(shares),
+        currentPrice: price,
       },
     ]);
 
     setSymbol("");
-    setBoughtPrice("");
+    setBuyPrice("");
     setShares("");
   }
 
-  // 🔁 REAL-TIME UPDATES EVERY 30 SECONDS
+  /* ============================
+     DELETE STOCK
+  ============================ */
+  function deleteStock(id) {
+    setPortfolio((prev) => prev.filter((s) => s.id !== id));
+  }
+
+  /* ============================
+     REFRESH PRICES
+  ============================ */
+  async function refreshPrices() {
+    setLoadingPrices(true);
+
+    const updated = await Promise.all(
+      portfolio.map(async (stock) => {
+        const price = await fetchPrice(stock.symbol);
+        return {
+          ...stock,
+          currentPrice: price ?? stock.currentPrice,
+        };
+      })
+    );
+
+    setPortfolio(updated);
+    setLoadingPrices(false);
+  }
+
+  /* ============================
+     AUTO REFRESH (60s)
+  ============================ */
   useEffect(() => {
     if (portfolio.length === 0) return;
 
-    const interval = setInterval(async () => {
-      const updatedPortfolio = await Promise.all(
-        portfolio.map(async (stock) => {
-          const data = await fetchPrice(stock.symbol);
-          const currentPrice = data.price;
-
-          const gainLoss =
-            (currentPrice - stock.boughtPrice) * stock.shares;
-
-          return {
-            ...stock,
-            currentPrice,
-            gainLoss,
-          };
-        })
-      );
-
-      setPortfolio(updatedPortfolio);
-    }, 30000); // 30 seconds
+    const interval = setInterval(() => {
+      refreshPrices();
+    }, 60000);
 
     return () => clearInterval(interval);
   }, [portfolio]);
 
-  const totalGainLoss = portfolio
-    .reduce((acc, s) => acc + s.gainLoss, 0)
-    .toFixed(2);
+  /* ============================
+     CALCULATIONS
+  ============================ */
+  const totalGain = portfolio.reduce((acc, stock) => {
+    return (
+      acc +
+      (stock.currentPrice - stock.buyPrice) * stock.shares
+    );
+  }, 0);
 
+  /* ============================
+     UI
+  ============================ */
   return (
-    <main
-      style={{
-        minHeight: "100vh",
-        padding: "40px 20px",
-        fontFamily: "'Segoe UI', sans-serif",
-        background: "linear-gradient(to bottom, #f0f4f8, #d9e2ec)",
-      }}
-    >
-      {/* Header */}
-      <header style={{ textAlign: "center", marginBottom: "40px" }}>
-        <h1 style={{ fontSize: "48px", margin: 0 }}>Only Up (Hi)</h1>
-        <p style={{ fontSize: "18px", color: "#555" }}>
-          Real-time portfolio tracking. Exact gains. No fluff.
-        </p>
-      </header>
+    <main style={styles.container}>
+      <h1 style={styles.title}>Only Up 📈</h1>
+      <p style={styles.subtitle}>
+        Track gains instantly. Create an account later.
+      </p>
 
-      {/* Inputs */}
-      <div style={{ textAlign: "center", marginBottom: "40px" }}>
+      <div style={styles.notice}>
+        You’re using an anonymous portfolio.
+        <strong> Create an account</strong> to save forever.
+      </div>
+
+      <div style={styles.card}>
         <input
-          placeholder="Symbol"
+          placeholder="Symbol (AAPL)"
           value={symbol}
           onChange={(e) => setSymbol(e.target.value)}
-          style={inputStyle}
+          style={styles.input}
         />
         <input
-          type="number"
           placeholder="Bought at $"
-          value={boughtPrice}
-          onChange={(e) => setBoughtPrice(e.target.value)}
-          style={inputStyle}
+          type="number"
+          value={buyPrice}
+          onChange={(e) => setBuyPrice(e.target.value)}
+          style={styles.input}
         />
         <input
-          type="number"
           placeholder="Shares"
+          type="number"
           value={shares}
           onChange={(e) => setShares(e.target.value)}
-          style={inputStyle}
+          style={styles.input}
         />
-        <button onClick={addStock} style={buttonStyle}>
+        <button onClick={addStock} style={styles.button}>
           Add
+        </button>
+        {error && <p style={styles.error}>{error}</p>}
+      </div>
+
+      <div style={styles.refreshRow}>
+        <h2>Portfolio</h2>
+        <button
+          onClick={refreshPrices}
+          style={styles.refreshBtn}
+          disabled={loadingPrices}
+        >
+          {loadingPrices ? "Refreshing..." : "Refresh Prices"}
         </button>
       </div>
 
-      {/* Portfolio */}
-      {portfolio.length > 0 && (
-        <div style={{ maxWidth: "900px", margin: "0 auto" }}>
-          <h2 style={{ textAlign: "center", marginBottom: "20px" }}>
-            Portfolio
-          </h2>
+      {portfolio.map((stock) => {
+        const gain =
+          (stock.currentPrice - stock.buyPrice) * stock.shares;
 
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "16px", justifyContent: "center" }}>
-            {portfolio.map((stock, index) => (
-              <div key={index} style={cardStyle}>
-                <h3>{stock.symbol}</h3>
-                <p>Bought: ${stock.boughtPrice}</p>
-                <p>Shares: {stock.shares}</p>
-                <p>Current: ${stock.currentPrice}</p>
-                <p
-                  style={{
-                    fontWeight: "bold",
-                    color: stock.gainLoss >= 0 ? "green" : "red",
-                  }}
-                >
-                  {stock.gainLoss >= 0 ? "+" : "-"}$
-                  {Math.abs(stock.gainLoss).toFixed(2)}
-                </p>
-              </div>
-            ))}
+        return (
+          <div key={stock.id} style={styles.stockCard}>
+            <div style={styles.stockHeader}>
+              <strong>{stock.symbol}</strong>
+              <button
+                onClick={() => deleteStock(stock.id)}
+                style={styles.deleteBtn}
+              >
+                ✕
+              </button>
+            </div>
+            <p>Bought: ${stock.buyPrice}</p>
+            <p>Shares: {stock.shares}</p>
+            <p>Current: ${stock.currentPrice.toFixed(2)}</p>
+            <p
+              style={{
+                color: gain >= 0 ? "green" : "red",
+                fontWeight: "bold",
+              }}
+            >
+              {gain >= 0 ? "+" : "-"}$
+              {Math.abs(gain).toFixed(2)}
+            </p>
           </div>
+        );
+      })}
 
-          <div
-            style={{
-              marginTop: "30px",
-              fontSize: "22px",
-              textAlign: "center",
-              fontWeight: "bold",
-              color: totalGainLoss >= 0 ? "green" : "red",
-            }}
-          >
-            Total Gain / Loss: ${totalGainLoss}
-          </div>
-        </div>
-      )}
+      <h3
+        style={{
+          marginTop: 20,
+          color: totalGain >= 0 ? "green" : "red",
+        }}
+      >
+        Total Gain / Loss: {totalGain >= 0 ? "+" : "-"}$
+        {Math.abs(totalGain).toFixed(2)}
+      </h3>
     </main>
   );
 }
 
-// 🎨 Styles
-const inputStyle = {
-  padding: "12px",
-  marginRight: "8px",
-  borderRadius: "8px",
-  border: "1px solid #ccc",
-  width: "120px",
-};
-
-const buttonStyle = {
-  padding: "12px 20px",
-  borderRadius: "8px",
-  border: "none",
-  backgroundColor: "#0070f3",
-  color: "white",
-  fontWeight: "bold",
-  cursor: "pointer",
-};
-
-const cardStyle = {
-  backgroundColor: "#fff",
-  padding: "16px",
-  borderRadius: "12px",
-  boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-  minWidth: "180px",
-  textAlign: "center",
+/* ============================
+   STYLES
+============================ */
+const styles = {
+  container: {
+    maxWidth: 520,
+    margin: "40px auto",
+    fontFamily: "system-ui",
+  },
+  title: {
+    fontSize: 36,
+    marginBottom: 5,
+  },
+  subtitle: {
+    color: "#666",
+    marginBottom: 10,
+  },
+  notice: {
+    background: "#eef6ff",
+    padding: 10,
+    borderRadius: 6,
+    marginBottom: 20,
+    fontSize: 14,
+  },
+  card: {
+    background: "#f9f9f9",
+    padding: 20,
+    borderRadius: 10,
+    marginBottom: 25,
+  },
+  input: {
+    width: "100%",
+    padding: 10,
+    marginBottom: 10,
+    borderRadius: 6,
+    border: "1px solid #ddd",
+  },
+  button: {
+    width: "100%",
+    padding: 12,
+    background: "black",
+    color: "white",
+    border: "none",
+    borderRadius: 6,
+    cursor: "pointer",
+  },
+  refreshRow: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  refreshBtn: {
+    padding: "6px 10px",
+    fontSize: 12,
+    borderRadius: 6,
+    border: "1px solid #ddd",
+    cursor: "pointer",
+  },
+  error: {
+    color: "red",
+    marginTop: 10,
+  },
+  stockCard: {
+    background: "#fff",
+    padding: 15,
+    borderRadius: 8,
+    marginBottom: 10,
+    boxShadow: "0 2px 5px rgba(0,0,0,0.05)",
+  },
+  stockHeader: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  deleteBtn: {
+    background: "transparent",
+    border: "none",
+    fontSize: 16,
+    cursor: "pointer",
+  },
 };
