@@ -1,3 +1,5 @@
+import { supabase } from "../lib/supabase";
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -18,6 +20,15 @@ export default function Home() {
   const [error, setError] = useState("");
   const [loadingPrices, setLoadingPrices] = useState(false);
 
+  /* ============================
+     INIT Profile Creation USER
+  ============================ */
+const [user, setUser] = useState(null);
+const [email, setEmail] = useState("");
+const [password, setPassword] = useState("");
+const [authLoading, setAuthLoading] = useState(false);
+
+   
   /* ============================
      INIT ANONYMOUS USER
   ============================ */
