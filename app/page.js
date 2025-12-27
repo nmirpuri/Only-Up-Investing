@@ -1,7 +1,5 @@
-
-
 "use client";
-import { supabase } from "../lib/supabase";
+
 import { useState, useEffect } from "react";
 
 /* ============================
@@ -20,15 +18,6 @@ export default function Home() {
   const [error, setError] = useState("");
   const [loadingPrices, setLoadingPrices] = useState(false);
 
-  /* ============================
-     INIT Profile Creation USER
-  ============================ */
-const [user, setUser] = useState(null);
-const [email, setEmail] = useState("");
-const [password, setPassword] = useState("");
-const [authLoading, setAuthLoading] = useState(false);
-
-   
   /* ============================
      INIT ANONYMOUS USER
   ============================ */
@@ -65,47 +54,6 @@ const [authLoading, setAuthLoading] = useState(false);
       })
     );
   }, [portfolio, userId]);
-
-    /* ============================
-     Detect Logged in User
-  ============================ */ 
-   useEffect(() => {
-  supabase.auth.getUser().then(({ data }) => {
-    setUser(data.user);
-  });
-
-  const {
-    data: { subscription },
-  } = supabase.auth.onAuthStateChange((_event, session) => {
-    setUser(session?.user ?? null);
-  });
-
-  return () => subscription.unsubscribe();
-}, []);
-
-async function signUp() {
-  setAuthLoading(true);
-  const { error } = await supabase.auth.signUp({
-    email,
-    password,
-  });
-  if (error) alert(error.message);
-  setAuthLoading(false);
-}
-
-async function signIn() {
-  setAuthLoading(true);
-  const { error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  });
-  if (error) alert(error.message);
-  setAuthLoading(false);
-}
-
-async function signOut() {
-  await supabase.auth.signOut();
-}
 
   /* ============================
      FETCH STOCK PRICE
@@ -207,47 +155,13 @@ async function signOut() {
   /* ============================
      UI
   ============================ */
-
-
   return (
     <main style={styles.container}>
-      <h1 style={styles.title}>Only Up</h1>
+      <h1 style={styles.title}>Only Up DiDi</h1>
       <p style={styles.subtitle}>
-        Track gains instantly
+        Track gains instantly. Create an account later.
       </p>
-   <div style={styles.authBox}>
-  {!user ? (
-    <>
-      <h3>Sign in or create an account</h3>
-      <input
-        placeholder="Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        style={styles.input}
-      />
-      <input
-        placeholder="Password"
-        type="password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        style={styles.input}
-      />
-      <button onClick={signIn} style={styles.button}>
-        Sign In
-      </button>
-      <button onClick={signUp} style={styles.secondaryBtn}>
-        Sign Up
-      </button>
-    </>
-  ) : (
-    <>
-      <p>Logged in as <strong>{user.email}</strong></p>
-      <button onClick={signOut} style={styles.secondaryBtn}>
-        Log Out
-      </button>
-    </>
-  )}
-</div>
+
       <div style={styles.notice}>
         You’re using an anonymous portfolio.
         <strong> Create an account</strong> to save forever.
@@ -338,25 +252,7 @@ async function signOut() {
 /* ============================
    STYLES
 ============================ */
-
-
 const styles = {
-   authBox: {
-  background: "#fff",
-  padding: 20,
-  borderRadius: 10,
-  marginBottom: 20,
-  boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-},
-secondaryBtn: {
-  width: "100%",
-  padding: 10,
-  marginTop: 8,
-  background: "#f0f0f0",
-  border: "none",
-  borderRadius: 6,
-  cursor: "pointer",
-},
   container: {
     maxWidth: 520,
     margin: "40px auto",
