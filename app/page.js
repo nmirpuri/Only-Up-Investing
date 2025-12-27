@@ -58,15 +58,18 @@ export default function Home() {
   /* ============================
      FETCH STOCK PRICE
   ============================ */
-  async function fetchPrice(stock) {
-    try {
-      const res = await fetch(`/api/stock?symbol=${stock}`);
-      const data = await res.json();
-      return data.price;
-    } catch {
-      return null;
-    }
+async function fetchPrice(stock) {
+  try {
+    const res = await fetch(`/api/stock?symbol=${stock}`);
+    const data = await res.json();
+    if (!data || typeof data.price !== "number") return null;
+    return data.price;
+  } catch (err) {
+    console.error("Fetch price error:", err);
+    return null;
   }
+}
+
 
   /* ============================
      ADD STOCK
@@ -132,15 +135,14 @@ export default function Home() {
   /* ============================
      AUTO REFRESH (60s)
   ============================ */
-  useEffect(() => {
-    if (portfolio.length === 0) return;
+useEffect(() => {
+  if (portfolio.length === 0) return;
 
-    const interval = setInterval(() => {
-      refreshPrices();
-    }, 60000);
+  const interval = setInterval(refreshPrices, 60000);
 
-    return () => clearInterval(interval);
-  }, [portfolio]);
+  return () => clearInterval(interval);
+}, []); // only run once
+
 
   /* ============================
      CALCULATIONS
