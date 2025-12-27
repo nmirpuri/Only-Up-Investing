@@ -243,9 +243,9 @@ async function signOut() {
 
   return (
     <main style={styles.container}>
-      <h1 style={styles.title}>Only Up 📈</h1>
+      <h1 style={styles.title}>Only Up</h1>
       <p style={styles.subtitle}>
-        Track gains instantly. Create an account later.
+        Track gains instantly
       </p>
 
       <div style={styles.notice}>
