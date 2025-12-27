@@ -1,7 +1,7 @@
-import { supabase } from "../lib/supabase";
+
 
 "use client";
-
+import { supabase } from "../lib/supabase";
 import { useState, useEffect } from "react";
 
 /* ============================
@@ -207,6 +207,14 @@ async function signOut() {
   /* ============================
      UI
   ============================ */
+
+
+  return (
+    <main style={styles.container}>
+      <h1 style={styles.title}>Only Up</h1>
+      <p style={styles.subtitle}>
+        Track gains instantly
+      </p>
    <div style={styles.authBox}>
   {!user ? (
     <>
@@ -240,14 +248,6 @@ async function signOut() {
     </>
   )}
 </div>
-
-  return (
-    <main style={styles.container}>
-      <h1 style={styles.title}>Only Up</h1>
-      <p style={styles.subtitle}>
-        Track gains instantly
-      </p>
-
       <div style={styles.notice}>
         You’re using an anonymous portfolio.
         <strong> Create an account</strong> to save forever.
@@ -338,7 +338,10 @@ async function signOut() {
 /* ============================
    STYLES
 ============================ */
-authBox: {
+
+
+const styles = {
+   authBox: {
   background: "#fff",
   padding: 20,
   borderRadius: 10,
@@ -354,8 +357,6 @@ secondaryBtn: {
   borderRadius: 6,
   cursor: "pointer",
 },
-
-const styles = {
   container: {
     maxWidth: 520,
     margin: "40px auto",
