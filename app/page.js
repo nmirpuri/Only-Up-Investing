@@ -66,6 +66,47 @@ const [authLoading, setAuthLoading] = useState(false);
     );
   }, [portfolio, userId]);
 
+    /* ============================
+     Detect Logged in User
+  ============================ */ 
+   useEffect(() => {
+  supabase.auth.getUser().then(({ data }) => {
+    setUser(data.user);
+  });
+
+  const {
+    data: { subscription },
+  } = supabase.auth.onAuthStateChange((_event, session) => {
+    setUser(session?.user ?? null);
+  });
+
+  return () => subscription.unsubscribe();
+}, []);
+
+async function signUp() {
+  setAuthLoading(true);
+  const { error } = await supabase.auth.signUp({
+    email,
+    password,
+  });
+  if (error) alert(error.message);
+  setAuthLoading(false);
+}
+
+async function signIn() {
+  setAuthLoading(true);
+  const { error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
+  if (error) alert(error.message);
+  setAuthLoading(false);
+}
+
+async function signOut() {
+  await supabase.auth.signOut();
+}
+
   /* ============================
      FETCH STOCK PRICE
   ============================ */
@@ -166,6 +207,40 @@ const [authLoading, setAuthLoading] = useState(false);
   /* ============================
      UI
   ============================ */
+   <div style={styles.authBox}>
+  {!user ? (
+    <>
+      <h3>Sign in or create an account</h3>
+      <input
+        placeholder="Email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        style={styles.input}
+      />
+      <input
+        placeholder="Password"
+        type="password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        style={styles.input}
+      />
+      <button onClick={signIn} style={styles.button}>
+        Sign In
+      </button>
+      <button onClick={signUp} style={styles.secondaryBtn}>
+        Sign Up
+      </button>
+    </>
+  ) : (
+    <>
+      <p>Logged in as <strong>{user.email}</strong></p>
+      <button onClick={signOut} style={styles.secondaryBtn}>
+        Log Out
+      </button>
+    </>
+  )}
+</div>
+
   return (
     <main style={styles.container}>
       <h1 style={styles.title}>Only Up 📈</h1>
@@ -263,6 +338,23 @@ const [authLoading, setAuthLoading] = useState(false);
 /* ============================
    STYLES
 ============================ */
+authBox: {
+  background: "#fff",
+  padding: 20,
+  borderRadius: 10,
+  marginBottom: 20,
+  boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+},
+secondaryBtn: {
+  width: "100%",
+  padding: 10,
+  marginTop: 8,
+  background: "#f0f0f0",
+  border: "none",
+  borderRadius: 6,
+  cursor: "pointer",
+},
+
 const styles = {
   container: {
     maxWidth: 520,
