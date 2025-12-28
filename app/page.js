@@ -11,6 +11,9 @@ function generateAnonId() {
 }
 
 export default function Home() {
+const [showAuth, setShowAuth] = useState(false);
+const [isSignUp, setIsSignUp] = useState(false);
+
 const [user, setUser] = useState(null);
 const [email, setEmail] = useState("");
 const [password, setPassword] = useState("");
@@ -211,45 +214,33 @@ useEffect(() => {
       </p>
 
 
-<div style={styles.authBox}>
-  {!user ? (
-    <>
-      <h3>Sign in or create an account</h3>
-      <input
-        placeholder="Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        style={styles.input}
-      />
-      <input
-        placeholder="Password"
-        type="password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        style={styles.input}
-      />
-      <button onClick={signIn} style={styles.button}>
-        Sign In
-      </button>
-      <button onClick={signUp} style={styles.secondaryBtn}>
-        Sign Up
-      </button>
-    </>
-  ) : (
-    <>
-      <p>Logged in as <strong>{user.email}</strong></p>
-      <button onClick={signOut} style={styles.secondaryBtn}>
-        Log Out
-      </button>
-    </>
-  )}
-</div>
+{!user && (
+  <button
+    style={styles.button}
+    onClick={() => {
+      setIsSignUp(false);
+      setShowAuth(true);
+    }}
+  >
+    Sign In
+  </button>
+)}
+
 
 
      
       <div style={styles.notice}>
         You’re using an anonymous portfolio.
-        <strong> Create an account</strong> to save forever.
+       <strong
+  style={{ cursor: "pointer", textDecoration: "underline" }}
+  onClick={() => {
+    setIsSignUp(true);
+    setShowAuth(true);
+  }}
+>
+  Create an account
+</strong>
+
       </div>
 
       <div style={styles.card}>
