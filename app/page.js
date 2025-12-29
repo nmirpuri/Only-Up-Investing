@@ -13,8 +13,10 @@ function generateAnonId() {
 export default function Home() {
 const [showAuth, setShowAuth] = useState(false);
 const [isSignUp, setIsSignUp] = useState(false);
+const [authView, setAuthView] = useState(null);
 
-const [user, setUser] = useState(null);
+
+const [name, setName] = useState("");
 const [email, setEmail] = useState("");
 const [password, setPassword] = useState("");
 const [authLoading, setAuthLoading] = useState(false);
@@ -27,6 +29,23 @@ const [authLoading, setAuthLoading] = useState(false);
   const [error, setError] = useState("");
   const [loadingPrices, setLoadingPrices] = useState(false);
 
+ const signUp = async () => {
+  const { error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      data: {
+        name: name,
+      },
+    },
+  });
+
+  if (error) {
+    alert(error.message);
+  } else {
+    setAuthView(null); // go back to home after signup
+  }
+};
   /* ============================
      INIT ANONYMOUS USER
   ============================ */
@@ -89,6 +108,96 @@ async function signUp() {
   if (error) alert(error.message);
   setAuthLoading(false);
 }
+
+
+ 
+const signIn = async () => {
+  const { error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
+
+  if (error) {
+    alert(error.message);
+  } else {
+    setAuthView(null); // go back to home
+  }
+};
+
+
+ const renderSignIn = () => (
+  <>
+    <h1>Sign In</h1>
+
+    <input
+      placeholder="Email"
+      value={email}
+      onChange={(e) => setEmail(e.target.value)}
+      style={styles.input}
+    />
+
+    <input
+      placeholder="Password"
+      type="password"
+      value={password}
+      onChange={(e) => setPassword(e.target.value)}
+      style={styles.input}
+    />
+
+    <button style={styles.button} onClick={signIn}>
+      Sign In
+    </button>
+
+    <p style={styles.link} onClick={() => setAuthView("signup")}>
+      Don’t have an account? Create one
+    </p>
+
+    <p style={styles.link} onClick={() => setAuthView(null)}>
+      ← Back
+    </p>
+  </>
+);
+
+const renderSignUp = () => (
+  <>
+    <h1>Create Account</h1>
+
+    <input
+      placeholder="Name"
+      value={name}
+      onChange={(e) => setName(e.target.value)}
+      style={styles.input}
+    />
+
+    <input
+      placeholder="Email"
+      value={email}
+      onChange={(e) => setEmail(e.target.value)}
+      style={styles.input}
+    />
+
+    <input
+      placeholder="Password"
+      type="password"
+      value={password}
+      onChange={(e) => setPassword(e.target.value)}
+      style={styles.input}
+    />
+
+    <button style={styles.button} onClick={signUp}>
+      Create Account
+    </button>
+
+    <p style={styles.link} onClick={() => setAuthView("signin")}>
+      Already have an account? Sign in
+    </p>
+
+    <p style={styles.link} onClick={() => setAuthView(null)}>
+      ← Back
+    </p>
+  </>
+);
+
 
 async function signIn() {
   setAuthLoading(true);
@@ -206,28 +315,36 @@ useEffect(() => {
   /* ============================
      UI
   ============================ */
-  return (
-    <main style={styles.container}>
-      <h1 style={styles.title}>Only Up LFG!</h1>
-      <p style={styles.subtitle}>
-        Track gains instantly. Create an account later.
-      </p>
+ return (
+  <main style={styles.container}>
+    {authView === null && (
+      <>
+        <h1 style={styles.title}>Only Up LFG!</h1>
 
+        {!user && (
+          <button
+            style={styles.button}
+            onClick={() => setAuthView("signin")}
+          >
+            Sign In
+          </button>
+        )}
 
-{!user && (
-  <button
-    style={styles.button}
-    onClick={() => {
-      setIsSignUp(false);
-      setShowAuth(true);
-    }}
-  >
-    Sign In
-  </button>
-)}
+        <div style={styles.notice}>
+          You’re using an anonymous portfolio.
+          <strong
+            style={{ cursor: "pointer" }}
+            onClick={() => setAuthView("signup")}
+          >
+            {" "}Create an account
+          </strong>
+        </div>
 
-
-
+<h2>
+  {user
+    ? `${user.user_metadata?.name || "User"}'s Profile`
+    : "Profile"}
+</h2>
      
       <div style={styles.notice}>
         You’re using an anonymous portfolio.
@@ -321,7 +438,10 @@ useEffect(() => {
         Total Gain / Loss: {totalGain >= 0 ? "+" : "-"}$
         {Math.abs(totalGain).toFixed(2)}
       </h3>
-    </main>
+   
+    {authView === "signin" && renderSignIn()}
+    {authView === "signup" && renderSignUp()}
+  </main>
   );
 }
 
