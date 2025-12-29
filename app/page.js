@@ -205,36 +205,40 @@ export default function Home() {
         </button>
       </div>
 
-      {portfolio.map((stock) => {
-        const gain =
-          (stock.currentPrice - stock.buyPrice) * stock.shares;
+     <div style={styles.portfolioGrid}>
+  {portfolio.map((stock) => {
+    const gain =
+      (stock.currentPrice - stock.buyPrice) * stock.shares;
 
-        return (
-          <div key={stock.id} style={styles.stockCard}>
-            <div style={styles.stockHeader}>
-              <strong>{stock.symbol}</strong>
-              <button
-                onClick={() => deleteStock(stock.id)}
-                style={styles.deleteBtn}
-              >
-                ✕
-              </button>
-            </div>
-            <p>Bought: ${stock.buyPrice}</p>
-            <p>Shares: {stock.shares}</p>
-            <p>Current: ${stock.currentPrice.toFixed(2)}</p>
-            <p
-              style={{
-                color: gain >= 0 ? "green" : "red",
-                fontWeight: "bold",
-              }}
-            >
-              {gain >= 0 ? "+" : "-"}$
-              {Math.abs(gain).toFixed(2)}
-            </p>
-          </div>
-        );
-      })}
+    return (
+      <div key={stock.id} style={styles.stockCard}>
+        <div style={styles.stockHeader}>
+          <strong>{stock.symbol}</strong>
+          <button
+            onClick={() => deleteStock(stock.id)}
+            style={styles.deleteBtn}
+          >
+            ✕
+          </button>
+        </div>
+        <p style={styles.stockText}>Bought: ${stock.buyPrice}</p>
+        <p style={styles.stockText}>Shares: {stock.shares}</p>
+        <p style={styles.stockText}>
+          Current: ${stock.currentPrice.toFixed(2)}
+        </p>
+        <p
+          style={{
+            color: gain >= 0 ? "#22c55e" : "#f87171",
+            fontWeight: "bold",
+          }}
+        >
+          {gain >= 0 ? "+" : "-"}${Math.abs(gain).toFixed(2)}
+        </p>
+      </div>
+    );
+  })}
+</div>
+
 
       <h3
         style={{
