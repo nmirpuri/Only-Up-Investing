@@ -156,7 +156,7 @@ export default function Home() {
      UI
   ============================ */
   return (
-      <div style={{ background: "#1e3a8a", minHeight: "100vh", padding: 40 }}>
+      <div style={{ background: "#2596be", minHeight: "100vh", padding: 40 }}>
     <main style={styles.container}>
       <h1 style={styles.title}>Only Up Investing</h1>
       <p style={styles.subtitle}>
@@ -310,7 +310,7 @@ const styles = {
     width: "100%",
     padding: 14,
     background: "#facc15",
-    color: "#1e3a8a",
+    color: "#2596be",
     fontWeight: "600",
     border: "none",
     borderRadius: 8,
@@ -333,7 +333,7 @@ const styles = {
     borderRadius: 8,
     border: "none",
     cursor: "pointer",
-    color: "#1e3a8a",
+    color: "#2596be",
     background: "#facc15",
   },
   error: {
