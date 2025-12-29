@@ -158,15 +158,12 @@ export default function Home() {
   return (
       <div style={{ background: "#1e3a8a", minHeight: "100vh", padding: 40 }}>
     <main style={styles.container}>
-      <h1 style={styles.title}>Only Up 📈</h1>
+      <h1 style={styles.title}>Only Up Investing</h1>
       <p style={styles.subtitle}>
-        Track gains instantly. Create an account later.
+       The Sky is the Limit
       </p>
 
-      <div style={styles.notice}>
-        You’re using an anonymous portfolio.
-        <strong> Create an account</strong> to save forever.
-      </div>
+
 
       <div style={styles.card}>
         <input
