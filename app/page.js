@@ -156,6 +156,7 @@ export default function Home() {
      UI
   ============================ */
   return (
+      <div style={{ background: "#1e3a8a", minHeight: "100vh", padding: 40 }}>
     <main style={styles.container}>
       <h1 style={styles.title}>Only Up 📈</h1>
       <p style={styles.subtitle}>
@@ -250,6 +251,7 @@ export default function Home() {
         {Math.abs(totalGain).toFixed(2)}
       </h3>
     </main>
+  </div>
   );
 }
 
@@ -258,15 +260,11 @@ export default function Home() {
 ============================ */
 const styles = {
   container: {
-    maxWidth: "1200px",
-    margin: "40px auto",
-    fontFamily: "'Poppins', sans-serif",
-    background: "#1e3a8a", // deep, soft blue
-    padding: "40px 20px",
-    borderRadius: 12,
-    minHeight: "100vh",
-    color: "#fff",
-  },
+  maxWidth: "1200px",
+  margin: "0 auto", // centered
+  fontFamily: "'Poppins', sans-serif",
+  color: "#fff",
+},
   title: {
     fontSize: 42,
     fontWeight: "700",
