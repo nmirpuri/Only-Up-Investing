@@ -319,7 +319,7 @@ useEffect(() => {
   <main style={styles.container}>
     {authView === null && (
       <>
-        <h1 style={styles.title}>Only Up LFG!</h1>
+        <h1 style={styles.title}>Only Up Working?</h1>
 
         {!user && (
           <button
