@@ -256,26 +256,39 @@ export default function Home() {
    STYLES
 ============================ */
 const styles = {
+  // ===== Page background =====
+  pageWrapper: {
+    background: "#f5f7fa", // very light gray-blue
+    minHeight: "100vh",
+    padding: "40px 20px",
+    fontFamily: "'Inter', sans-serif",
+    color: "#111827", // default dark text
+  },
+
+  // ===== Main container =====
   container: {
-  maxWidth: "1400px",
-  margin: "0 auto", // centered
-  fontFamily: "'Poppins', sans-serif",
-  color: "#fff",
-},
+    maxWidth: "1200px",
+    margin: "0 auto",
+  },
+
+  // ===== Titles =====
   title: {
-    fontSize: 42,
-    fontWeight: "700",
-    marginBottom: 10,
+    fontSize: 40,
+    fontWeight: 700,
     textAlign: "center",
+    marginBottom: 6,
+    color: "#111827",
   },
   subtitle: {
-    color: "#cbd5e1",
     fontSize: 16,
+    color: "#6b7280", // muted gray for subtitle
     textAlign: "center",
     marginBottom: 30,
   },
+
+  // ===== Notices =====
   notice: {
-    background: "#2563eb",
+    background: "#e0f2fe", // soft blue
     padding: 14,
     borderRadius: 10,
     marginBottom: 30,
@@ -283,44 +296,49 @@ const styles = {
     textAlign: "center",
     cursor: "pointer",
     fontWeight: 500,
+    color: "#0c4a6e",
     transition: "background 0.2s ease",
   },
   noticeHover: {
-    background: "#1d4ed8",
+    background: "#bae6fd",
   },
+
+  // ===== Input + Form =====
   card: {
-    background: "#1e40af",
+    background: "#ffffff",
     padding: 20,
     borderRadius: 12,
     marginBottom: 25,
-    boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
+    boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
   },
   input: {
     width: "100%",
     padding: 12,
     marginBottom: 12,
     borderRadius: 8,
-    border: "none",
-    background: "#3b82f6",
-    color: "#fff",
+    border: "1px solid #d1d5db",
+    background: "#f9fafb",
+    color: "#111827",
     fontSize: 14,
     outline: "none",
   },
   button: {
     width: "100%",
     padding: 14,
-    background: "#facc15",
-    color: "#2596be",
-    fontWeight: "600",
+    background: "#2563eb", // vibrant blue
+    color: "#ffffff",
+    fontWeight: 600,
     border: "none",
     borderRadius: 8,
     cursor: "pointer",
     fontSize: 16,
-    transition: "all 0.2s ease",
+    transition: "background 0.2s ease",
   },
   buttonHover: {
-    background: "#eab308",
+    background: "#1e40af", // darker blue on hover
   },
+
+  // ===== Portfolio Section =====
   refreshRow: {
     display: "flex",
     justifyContent: "space-between",
@@ -333,34 +351,38 @@ const styles = {
     borderRadius: 8,
     border: "none",
     cursor: "pointer",
-    color: "#2596be",
-    background: "#facc15",
+    color: "#2563eb",
+    background: "#e0f2fe",
+    fontWeight: 600,
   },
+
   error: {
-    color: "#f87171",
+    color: "#dc2626", // red for errors
     marginTop: 10,
-    fontWeight: "600",
+    fontWeight: 600,
   },
+
   portfolioGrid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))",
+    gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
     gap: 20,
   },
+
   stockCard: {
-    background: "#3b82f6",
+    background: "#ffffff",
     padding: 20,
     borderRadius: 12,
-    boxShadow: "0 6px 18px rgba(0,0,0,0.3)",
+    boxShadow: "0 6px 18px rgba(0,0,0,0.08)",
     display: "flex",
     flexDirection: "column",
     justifyContent: "space-between",
     transition: "transform 0.2s ease, box-shadow 0.2s ease",
-    cursor: "pointer",
   },
   stockCardHover: {
     transform: "translateY(-4px)",
-    boxShadow: "0 12px 24px rgba(0,0,0,0.35)",
+    boxShadow: "0 12px 24px rgba(0,0,0,0.12)",
   },
+
   stockHeader: {
     display: "flex",
     justifyContent: "space-between",
@@ -372,12 +394,24 @@ const styles = {
     border: "none",
     fontSize: 18,
     cursor: "pointer",
-    color: "#f87171",
+    color: "#dc2626",
     fontWeight: "700",
   },
   stockText: {
     fontSize: 14,
     marginBottom: 6,
+    color: "#111827",
+  },
+  gainText: {
+    fontWeight: "bold",
+    fontSize: 14,
+  },
+
+  // ===== Total Gain / Loss =====
+  totalGain: {
+    marginTop: 20,
+    fontWeight: 700,
+    fontSize: 18,
   },
 };
 
