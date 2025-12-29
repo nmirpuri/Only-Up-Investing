@@ -260,7 +260,7 @@ export default function Home() {
 ============================ */
 const styles = {
   container: {
-  maxWidth: "1200px",
+  maxWidth: "1400px",
   margin: "0 auto", // centered
   fontFamily: "'Poppins', sans-serif",
   color: "#fff",
