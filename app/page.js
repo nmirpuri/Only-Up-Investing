@@ -7,7 +7,8 @@ import { useState, useEffect } from "react";
 ============================ */
 const styles = {
   container: {
-    maxWidth: 520,
+   color: "#2596be",
+    maxWidth: 1200,
     margin: "40px auto",
     fontFamily: "system-ui",
   },
