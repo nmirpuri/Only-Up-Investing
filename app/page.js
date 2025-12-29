@@ -3,6 +3,37 @@
 import { useState, useEffect } from "react";
 
 /* ============================
+   STYLES
+============================ */
+const styles = {
+  container: {
+    maxWidth: 520,
+    margin: "40px auto",
+    fontFamily: "system-ui",
+  },
+  title: { fontSize: 36, marginBottom: 5 },
+  subtitle: { color: "#666", marginBottom: 10 },
+  notice: {
+    background: "#eef6ff",
+    padding: 10,
+    borderRadius: 6,
+    marginBottom: 20,
+    fontSize: 14,
+  },
+  card: { background: "#f9f9f9", padding: 20, borderRadius: 10, marginBottom: 25 },
+  input: { width: "100%", padding: 10, marginBottom: 10, borderRadius: 6, border: "1px solid #ddd" },
+  button: { width: "100%", padding: 12, background: "black", color: "white", border: "none", borderRadius: 6, cursor: "pointer" },
+  refreshRow: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 },
+  refreshBtn: { padding: "6px 10px", fontSize: 12, borderRadius: 6, border: "1px solid #ddd", cursor: "pointer" },
+  error: { color: "red", marginTop: 10 },
+  portfolioGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 20, marginTop: 20 },
+  stockCard: { background: "#fff", padding: 15, borderRadius: 8, marginBottom: 10, boxShadow: "0 2px 5px rgba(0,0,0,0.05)" },
+  stockHeader: { display: "flex", justifyContent: "space-between", alignItems: "center" },
+  deleteBtn: { background: "transparent", border: "none", fontSize: 16, cursor: "pointer" },
+  stockText: { margin: "5px 0" },
+};
+
+/* ============================
    HELPERS
 ============================ */
 function generateAnonId() {
@@ -10,6 +41,9 @@ function generateAnonId() {
 }
 
 export default function Home() {
+  /* ============================
+     STATE
+  ============================ */
   const [userId, setUserId] = useState(null);
   const [symbol, setSymbol] = useState("");
   const [buyPrice, setBuyPrice] = useState("");
@@ -58,18 +92,17 @@ export default function Home() {
   /* ============================
      FETCH STOCK PRICE
   ============================ */
-async function fetchPrice(stock) {
-  try {
-    const res = await fetch(`/api/stock?symbol=${stock}`);
-    const data = await res.json();
-    if (!data || typeof data.price !== "number") return null;
-    return data.price;
-  } catch (err) {
-    console.error("Fetch price error:", err);
-    return null;
+  async function fetchPrice(stock) {
+    try {
+      const res = await fetch(`/api/stock?symbol=${stock}`);
+      const data = await res.json();
+      if (!data || typeof data.price !== "number") return null;
+      return data.price;
+    } catch (err) {
+      console.error("Fetch price error:", err);
+      return null;
+    }
   }
-}
-
 
   /* ============================
      ADD STOCK
@@ -135,23 +168,18 @@ async function fetchPrice(stock) {
   /* ============================
      AUTO REFRESH (60s)
   ============================ */
-useEffect(() => {
-  if (portfolio.length === 0) return;
+  useEffect(() => {
+    if (portfolio.length === 0) return;
 
-  const interval = setInterval(refreshPrices, 60000);
-
-  return () => clearInterval(interval);
-}, []); // only run once
-
+    const interval = setInterval(refreshPrices, 60000);
+    return () => clearInterval(interval);
+  }, [portfolio]);
 
   /* ============================
      CALCULATIONS
   ============================ */
   const totalGain = portfolio.reduce((acc, stock) => {
-    return (
-      acc +
-      (stock.currentPrice - stock.buyPrice) * stock.shares
-    );
+    return acc + (stock.currentPrice - stock.buyPrice) * stock.shares;
   }, 0);
 
   /* ============================
@@ -159,14 +187,10 @@ useEffect(() => {
   ============================ */
   return (
     <main style={styles.container}>
-      <h1 style={styles.title}>Only Up </h1>
-      <p style={styles.subtitle}>
-        Track gains instantly. 
-      </p>
+      <h1 style={styles.title}>Only Up</h1>
+      <p style={styles.subtitle}>Track gains instantly.</p>
 
-      <div style={styles.notice}>
-        The Sky is the Limit.
-      </div>
+      <div style={styles.notice}>The Sky is the Limit.</div>
 
       <div style={styles.card}>
         <input
@@ -206,120 +230,32 @@ useEffect(() => {
         </button>
       </div>
 
-<div style={styles.portfolioGrid}>
-  {portfolio.map((stock) => {
-    const gain =
-      (stock.currentPrice - stock.buyPrice) * stock.shares;
+      <div style={styles.portfolioGrid}>
+        {portfolio.map((stock) => {
+          const gain = (stock.currentPrice - stock.buyPrice) * stock.shares;
 
-    return (
-      <div key={stock.id} style={styles.stockCard}>
-        <div style={styles.stockHeader}>
-          <strong>{stock.symbol}</strong>
-          <button
-            onClick={() => deleteStock(stock.id)}
-            style={styles.deleteBtn}
-          >
-            ✕
-          </button>
-        </div>
-        <p style={styles.stockText}>Bought: ${stock.buyPrice}</p>
-        <p style={styles.stockText}>Shares: {stock.shares}</p>
-        <p style={styles.stockText}>
-          Current: ${stock.currentPrice.toFixed(2)}
-        </p>
-        <p
-          style={{
-            color: gain >= 0 ? "#22c55e" : "#f87171",
-            fontWeight: "bold",
-          }}
-        >
-          {gain >= 0 ? "+" : "-"}${Math.abs(gain).toFixed(2)}
-        </p>
+          return (
+            <div key={stock.id} style={styles.stockCard}>
+              <div style={styles.stockHeader}>
+                <strong>{stock.symbol}</strong>
+                <button onClick={() => deleteStock(stock.id)} style={styles.deleteBtn}>
+                  ✕
+                </button>
+              </div>
+              <p style={styles.stockText}>Bought: ${stock.buyPrice}</p>
+              <p style={styles.stockText}>Shares: {stock.shares}</p>
+              <p style={styles.stockText}>
+                Current: ${stock.currentPrice ? stock.currentPrice.toFixed(2) : "—"}
+              </p>
+              <p style={{ color: gain >= 0 ? "#22c55e" : "#f87171", fontWeight: "bold" }}>
+                {gain >= 0 ? "+" : "-"}${Math.abs(gain).toFixed(2)}
+              </p>
+            </div>
+          );
+        })}
       </div>
-    );
-  })}
-</div>
-     </main>
 
-/* ============================
-   STYLES
-============================ */
-const styles = {
-  container: {
-    maxWidth: 520,
-    margin: "40px auto",
-    fontFamily: "system-ui",
-  },
-  title: {
-    fontSize: 36,
-    marginBottom: 5,
-  },
-  subtitle: {
-    color: "#666",
-    marginBottom: 10,
-  },
-  notice: {
-    background: "#eef6ff",
-    padding: 10,
-    borderRadius: 6,
-    marginBottom: 20,
-    fontSize: 14,
-  },
-  card: {
-    background: "#f9f9f9",
-    padding: 20,
-    borderRadius: 10,
-    marginBottom: 25,
-  },
-  input: {
-    width: "100%",
-    padding: 10,
-    marginBottom: 10,
-    borderRadius: 6,
-    border: "1px solid #ddd",
-  },
-  button: {
-    width: "100%",
-    padding: 12,
-    background: "black",
-    color: "white",
-    border: "none",
-    borderRadius: 6,
-    cursor: "pointer",
-  },
-  refreshRow: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  refreshBtn: {
-    padding: "6px 10px",
-    fontSize: 12,
-    borderRadius: 6,
-    border: "1px solid #ddd",
-    cursor: "pointer",
-  },
-  error: {
-    color: "red",
-    marginTop: 10,
-  },
-  stockCard: {
-    background: "#fff",
-    padding: 15,
-    borderRadius: 8,
-    marginBottom: 10,
-    boxShadow: "0 2px 5px rgba(0,0,0,0.05)",
-  },
-  stockHeader: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  deleteBtn: {
-    background: "transparent",
-    border: "none",
-    fontSize: 16,
-    cursor: "pointer",
-  },
-};
+      <h3>Total Gain: ${totalGain.toFixed(2)}</h3>
+    </main>
+  );
+}
