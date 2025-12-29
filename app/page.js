@@ -159,14 +159,13 @@ useEffect(() => {
   ============================ */
   return (
     <main style={styles.container}>
-      <h1 style={styles.title}>Only Up DiDi</h1>
+      <h1 style={styles.title}>Only Up </h1>
       <p style={styles.subtitle}>
-        Track gains instantly. Create an account later.
+        Track gains instantly. 
       </p>
 
       <div style={styles.notice}>
-        You’re using an anonymous portfolio.
-        <strong> Create an account</strong> to save forever.
+        The Sky is the Limit.
       </div>
 
       <div style={styles.card}>
