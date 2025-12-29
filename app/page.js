@@ -221,9 +221,9 @@ const signUp = async () => {
         <>
           <h1 style={styles.title}>Only Up 📈</h1>
 
-          {user ? (
-            <>
-              <h2>{user.user_metadata?.name || "User"}’s Portfolio</h2>
+const userName = user?.user_metadata?.name || "User";
+<h1>{userName}'s Profile</h1>
+
               <button style={styles.secondaryBtn} onClick={signOut}>Log Out</button>
             </>
           ) : (
