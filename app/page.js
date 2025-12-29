@@ -85,21 +85,21 @@ export default function Home() {
   /* ============================
      AUTH FUNCTIONS
   ============================ */
-  const signUp = async () => {
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { name },
+const signUp = async () => {
+  const { error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      data: {
+        name: name, // 👈 this is the important line
       },
-    });
+    },
+  });
 
-    if (error) {
-      alert(error.message);
-    } else {
-      setAuthView(null);
-    }
-  };
+  if (error) {
+    alert(error.message);
+  }
+};
 
   const signIn = async () => {
     const { error } = await supabase.auth.signInWithPassword({
@@ -193,6 +193,7 @@ export default function Home() {
       <h1>Sign In</h1>
       <input placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} style={styles.input} />
       <input placeholder="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} style={styles.input} />
+   
       <button style={styles.button} onClick={signIn}>Sign In</button>
       <p style={styles.link} onClick={() => setAuthView("signup")}>Create an account</p>
       <p style={styles.link} onClick={() => setAuthView(null)}>← Back</p>
