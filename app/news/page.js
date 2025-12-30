@@ -22,7 +22,7 @@ export default function NewsPage() {
 
     const fetchNews = async () => {
       setLoading(true);
-      const apiKey = process.env.MARKETAUX_API_KEY; // make sure this is set in .env.local
+      const apiKey = process.env.MARKETAUX_API_KEY; 
       const newsData = {};
 
       for (const symbol of symbols) {
