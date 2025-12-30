@@ -1,7 +1,7 @@
 import Navbar from "./components/Navbar";
 
 export const metadata = {
-  title: "Only Up",
+  title: "Only Up ",
   description: "Professional portfolio tracker",
 };
 
