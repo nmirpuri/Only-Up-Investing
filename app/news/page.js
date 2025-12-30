@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function NewsPage() {
   return (
     <main style={{ padding: 40 }}>
