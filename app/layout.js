@@ -1,4 +1,4 @@
-import Navbar from "../components/Navbar";
+import Navbar from "./components/Navbar";
 
 export const metadata = {
   title: "Only Up",
@@ -22,16 +22,4 @@ export default function RootLayout({ children }) {
       </body>
     </html>
   );
-}
-
-
-export default function RootLayout({ children }) {
-  return (
-    <html lang="en">
-      <head>
-        <title>Only Up</title>
-      </head>
-      <body>{children}</body>
-    </html>
-  )
 }
