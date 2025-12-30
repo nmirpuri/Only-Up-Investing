@@ -190,19 +190,7 @@ export default function Home() {
   ============================ */
   return (
     <main style={styles.container}>
-     <nav style={{ display: "flex", gap: 20, marginBottom: 30 }}>
-  <Link href="/" style={{ textDecoration: "none", color: "#2596be", fontWeight: 600 }}>
-    My Portfolio
-  </Link>
 
-  <Link href="/news" style={{ textDecoration: "none", color: "#2596be", fontWeight: 600 }}>
-    My News
-  </Link>
-
-  <Link href="/signin" style={{ textDecoration: "none", color: "#2596be", fontWeight: 600 }}>
-    Sign In
-  </Link>
-</nav>
 
       <h1 style={styles.title}>Only Up</h1>
       <p style={styles.subtitle}>Track gains instantly.</p>
