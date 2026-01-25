@@ -16,10 +16,10 @@ export default function TopTrades() {
         const res = await fetch("/api/insiders");
         const data = await res.json();
 
-        // Filter only Buy/Sell trades
-        const filtered = data.filter(
-          t => t.transaction_type === "Buy" || t.transaction_type === "Sell"
-        );
+        console.log("Raw API response:", data); // <-- Check raw API data in console
+
+        // For testing, show all transaction types
+        const filtered = data; // No Buy/Sell filter for now
 
         // Sort by date descending
         const sorted = filtered.sort(
