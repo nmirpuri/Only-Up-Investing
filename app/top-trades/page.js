@@ -6,27 +6,38 @@ export default function TopTrades() {
   const [trades, setTrades] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // List of people you want to follow (can expand)
+  // People to highlight at the top
   const followedPeople = ["Tim Cook", "Elon Musk", "Sundar Pichai"];
+
+  // List of tickers to fetch
+  const tickers = ["AAPL", "TSLA", "MSFT", "AMZN"];
 
   useEffect(() => {
     async function fetchTrades() {
       setLoading(true);
       try {
-        const res = await fetch("/api/insiders");
-        const data = await res.json();
+        let allTrades = [];
 
-        console.log("Raw API response:", data); // <-- Check raw API data in console
+        for (let ticker of tickers) {
+          const res = await fetch(`/api/insiders?ticker=${ticker}`);
+          const data = await res.json();
 
-        // For testing, show all transaction types
-        const filtered = data; // No Buy/Sell filter for now
+          if (Array.isArray(data)) {
+            // Add ticker info to each trade
+            const tradesWithTicker = data.map(t => ({ ...t, ticker }));
+            allTrades = allTrades.concat(tradesWithTicker);
+          }
+        }
+
+        // Filter out trades with no name
+        const filtered = allTrades.filter(t => t.name);
 
         // Sort by date descending
         const sorted = filtered.sort(
           (a, b) => new Date(b.transaction_date) - new Date(a.transaction_date)
         );
 
-        // Bring followed people to the top
+        // Followed people on top
         const finalTrades = sorted.sort((a, b) => {
           const aFollowed = followedPeople.includes(a.name) ? 0 : 1;
           const bFollowed = followedPeople.includes(b.name) ? 0 : 1;
@@ -84,10 +95,10 @@ export default function TopTrades() {
                   }}
                 >
                   <td style={{ padding: "10px 8px", fontWeight: isFollowed ? 600 : 400 }}>
-                    {t.name || "—"}
+                    {t.name}
                   </td>
                   <td style={{ padding: "10px 8px" }}>{t.relationship || "—"}</td>
-                  <td style={{ padding: "10px 8px" }}>{t.ticker || "—"}</td>
+                  <td style={{ padding: "10px 8px" }}>{t.ticker}</td>
                   <td style={{ padding: "10px 8px" }}>{t.transaction_type || "—"}</td>
                   <td style={{ padding: "10px 8px", textAlign: "right" }}>
                     {t.shares_traded != null ? t.shares_traded : "—"}
