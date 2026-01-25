@@ -23,8 +23,15 @@ export default function TopTrades() {
           const data = await res.json();
 
           if (Array.isArray(data)) {
-            // Add ticker info to each trade
-            const tradesWithTicker = data.map(t => ({ ...t, ticker }));
+            const tradesWithTicker = data.map(t => ({
+              name: t.name,
+              relationship: t.relationship,
+              ticker,
+              transaction_type: t.transactionType,
+              shares_traded: t.shares,
+              price: t.price,
+              transaction_date: t.transactionDate,
+            }));
             allTrades = allTrades.concat(tradesWithTicker);
           }
         }
@@ -94,18 +101,12 @@ export default function TopTrades() {
                     backgroundColor: isFollowed ? "#fef3c7" : i % 2 === 0 ? "#f9fafb" : "#ffffff"
                   }}
                 >
-                  <td style={{ padding: "10px 8px", fontWeight: isFollowed ? 600 : 400 }}>
-                    {t.name}
-                  </td>
+                  <td style={{ padding: "10px 8px", fontWeight: isFollowed ? 600 : 400 }}>{t.name}</td>
                   <td style={{ padding: "10px 8px" }}>{t.relationship || "—"}</td>
                   <td style={{ padding: "10px 8px" }}>{t.ticker}</td>
                   <td style={{ padding: "10px 8px" }}>{t.transaction_type || "—"}</td>
-                  <td style={{ padding: "10px 8px", textAlign: "right" }}>
-                    {t.shares_traded != null ? t.shares_traded : "—"}
-                  </td>
-                  <td style={{ padding: "10px 8px", textAlign: "right" }}>
-                    {t.price != null ? `$${t.price.toFixed(2)}` : "—"}
-                  </td>
+                  <td style={{ padding: "10px 8px", textAlign: "right" }}>{t.shares_traded != null ? t.shares_traded : "—"}</td>
+                  <td style={{ padding: "10px 8px", textAlign: "right" }}>{t.price != null ? `$${t.price.toFixed(2)}` : "—"}</td>
                   <td style={{ padding: "10px 8px" }}>{t.transaction_date || "—"}</td>
                 </tr>
               );
