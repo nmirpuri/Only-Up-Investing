@@ -1,35 +1,61 @@
-import { NextResponse } from "next/server";
+import fetch from "node-fetch";
 
-const FINNHUB_KEY = process.env.FINNHUB_API_KEY;
-
-// People you want pinned at the top
-const FOLLOWED_PEOPLE = ["Tim Cook", "Elon Musk", "Pelosi", "Warren Buffett"];
+const FINNHUB_API_KEY = process.env.FINNHUB_API_KEY;
 
 export async function GET() {
   try {
-    // Fetch CEO insider trades (example with AAPL)
-    const ceoRes = await fetch(
-      `https://finnhub.io/api/v1/stock/insider-transactions?symbol=AAPL&token=${FINNHUB_KEY}`
-    );
-    const ceoData = await ceoRes.json();
+    // Example tickers you want to show trades for
+    const tickers = ["AAPL", "TSLA", "MSFT", "AMZN"];
+    let allTrades = [];
 
-    // Placeholder for politician trades
-    const politicianData = []; // can add OpenFEC API later
-
-    function processTrades(trades) {
-      return trades
-        .filter((t) => t.name) // remove null names
-        .sort((a, b) =>
-          FOLLOWED_PEOPLE.includes(a.name) ? -1 : FOLLOWED_PEOPLE.includes(b.name) ? 1 : 0
+    for (let symbol of tickers) {
+      const res = await fetch(
+        `https://finnhub.io/api/v1/stock/insider-transactions?symbol=${symbol}&token=${FINNHUB_API_KEY}`
+      );
+      const data = await res.json();
+      if (data.data) {
+        allTrades = allTrades.concat(
+          data.data.map((trade) => ({
+            name: trade.name,
+            symbol: trade.symbol,
+            shares: trade.share,
+            transactionType:
+              trade.transactionCode === "S"
+                ? "Sale"
+                : trade.transactionCode === "G"
+                ? "Gift"
+                : trade.transactionCode === "P"
+                ? "Purchase"
+                : trade.transactionCode,
+            price: trade.transactionPrice,
+            date: trade.transactionDate,
+          }))
         );
+      }
     }
 
-    return NextResponse.json({
-      ceos: processTrades(ceoData),
-      politicians: politicianData,
+    // Filter out trades without names
+    allTrades = allTrades.filter((trade) => trade.name);
+
+    // Optional: put "followed" people at the top
+    const followedPeople = ["Tim Cook", "Elon Musk"];
+    allTrades.sort((a, b) => {
+      if (followedPeople.includes(a.name)) return -1;
+      if (followedPeople.includes(b.name)) return 1;
+      return new Date(b.date) - new Date(a.date); // newest first
     });
-  } catch (err) {
-    console.error("Error fetching trades:", err);
-    return NextResponse.json({ ceos: [], politicians: [] });
+
+    // Take top 30 trades
+    allTrades = allTrades.slice(0, 30);
+
+    return new Response(JSON.stringify(allTrades), {
+      headers: { "Content-Type": "application/json" },
+    });
+  } catch (error) {
+    console.error(error);
+    return new Response(
+      JSON.stringify({ error: "Failed to fetch insider trades" }),
+      { status: 500, headers: { "Content-Type": "application/json" } }
+    );
   }
 }
