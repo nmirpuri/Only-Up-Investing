@@ -1,27 +1,35 @@
+import { NextResponse } from "next/server";
 
+const FINNHUB_KEY = process.env.FINNHUB_API_KEY;
 
-export async function GET(req) {
+// People you want pinned at the top
+const FOLLOWED_PEOPLE = ["Tim Cook", "Elon Musk", "Pelosi", "Warren Buffett"];
+
+export async function GET() {
   try {
-    const { searchParams } = new URL(req.url);
-    const ticker = searchParams.get("ticker") || "AAPL"; // default ticker
-    const FINNHUB_KEY = process.env.FINNHUB_API_KEY;
+    // Fetch CEO insider trades (example with AAPL)
+    const ceoRes = await fetch(
+      `https://finnhub.io/api/v1/stock/insider-transactions?symbol=AAPL&token=${FINNHUB_KEY}`
+    );
+    const ceoData = await ceoRes.json();
 
-    if (!FINNHUB_KEY) {
-      return new Response(JSON.stringify({ error: "No API key set" }), { status: 500 });
+    // Placeholder for politician trades
+    const politicianData = []; // can add OpenFEC API later
+
+    function processTrades(trades) {
+      return trades
+        .filter((t) => t.name) // remove null names
+        .sort((a, b) =>
+          FOLLOWED_PEOPLE.includes(a.name) ? -1 : FOLLOWED_PEOPLE.includes(b.name) ? 1 : 0
+        );
     }
 
-    const url = `https://finnhub.io/api/v1/stock/insider-transactions?symbol=${ticker}&token=${FINNHUB_KEY}`;
-    const res = await fetch(url);
-
-    if (!res.ok) {
-      return new Response(JSON.stringify({ error: "Finnhub API error" }), { status: res.status });
-    }
-
-    const data = await res.json();
-    // Finnhub returns { data: [...] }
-    return new Response(JSON.stringify(data.data || []));
+    return NextResponse.json({
+      ceos: processTrades(ceoData),
+      politicians: politicianData,
+    });
   } catch (err) {
-    console.error(err);
-    return new Response(JSON.stringify({ error: "Server error" }), { status: 500 });
+    console.error("Error fetching trades:", err);
+    return NextResponse.json({ ceos: [], politicians: [] });
   }
 }
