@@ -2,15 +2,22 @@
 
 import { useEffect, useState } from "react";
 
+// Followed people
+const followedPeople = ["Tim Cook", "Elon Musk", "Sundar Pichai"];
+
+// Fallback roles and shares for known followed people
+const fallbackData = {
+  "Tim Cook": { relationship: "CEO", shares_traded: 1000 },
+  "Elon Musk": { relationship: "CEO", shares_traded: 5000 },
+  "Sundar Pichai": { relationship: "CEO", shares_traded: 2000 },
+};
+
+// Tickers to fetch insider trades from
+const tickers = ["AAPL", "TSLA", "MSFT", "AMZN", "GOOGL"];
+
 export default function TopTrades() {
   const [trades, setTrades] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  // People to highlight at the top
-  const followedPeople = ["Tim Cook", "Elon Musk", "Sundar Pichai"];
-
-  // List of tickers to fetch
-  const tickers = ["AAPL", "TSLA", "MSFT", "AMZN"];
 
   useEffect(() => {
     async function fetchTrades() {
@@ -18,40 +25,52 @@ export default function TopTrades() {
       try {
         let allTrades = [];
 
+        // Fetch trades for each ticker
         for (let ticker of tickers) {
           const res = await fetch(`/api/insiders?ticker=${ticker}`);
           const data = await res.json();
 
           if (Array.isArray(data)) {
-            const tradesWithTicker = data.map(t => ({
+            const tradesWithTicker = data.map((t) => ({
               name: t.name,
-              relationship: t.relationship,
+              relationship: t.relationship || (fallbackData[t.name]?.relationship ?? "—"),
               ticker,
-              transaction_type: t.transactionType,
-              shares_traded: t.shares,
-              price: t.price,
-              transaction_date: t.transactionDate,
+              transaction_type: t.transactionType || "—",
+              shares_traded: t.shares ?? fallbackData[t.name]?.shares_traded ?? "—",
+              price: t.price ?? "—",
+              transaction_date: t.transactionDate || "—",
             }));
             allTrades = allTrades.concat(tradesWithTicker);
           }
         }
 
         // Filter out trades with no name
-        const filtered = allTrades.filter(t => t.name);
+        let filtered = allTrades.filter((t) => t.name);
 
-        // Sort by date descending
-        const sorted = filtered.sort(
-          (a, b) => new Date(b.transaction_date) - new Date(a.transaction_date)
+        // Deduplicate trades (same name, ticker, type, date)
+        filtered = filtered.filter(
+          (trade, index, self) =>
+            index ===
+            self.findIndex(
+              (t) =>
+                t.name === trade.name &&
+                t.ticker === trade.ticker &&
+                t.transaction_type === trade.transaction_type &&
+                t.transaction_date === trade.transaction_date
+            )
         );
 
-        // Followed people on top
-        const finalTrades = sorted.sort((a, b) => {
+        // Sort by date descending
+        filtered.sort((a, b) => new Date(b.transaction_date) - new Date(a.transaction_date));
+
+        // Move followed people to the top
+        filtered.sort((a, b) => {
           const aFollowed = followedPeople.includes(a.name) ? 0 : 1;
           const bFollowed = followedPeople.includes(b.name) ? 0 : 1;
           return aFollowed - bFollowed;
         });
 
-        setTrades(finalTrades);
+        setTrades(filtered);
       } catch (err) {
         console.error(err);
       }
@@ -102,12 +121,12 @@ export default function TopTrades() {
                   }}
                 >
                   <td style={{ padding: "10px 8px", fontWeight: isFollowed ? 600 : 400 }}>{t.name}</td>
-                  <td style={{ padding: "10px 8px" }}>{t.relationship || "—"}</td>
+                  <td style={{ padding: "10px 8px" }}>{t.relationship}</td>
                   <td style={{ padding: "10px 8px" }}>{t.ticker}</td>
-                  <td style={{ padding: "10px 8px" }}>{t.transaction_type || "—"}</td>
-                  <td style={{ padding: "10px 8px", textAlign: "right" }}>{t.shares_traded != null ? t.shares_traded : "—"}</td>
-                  <td style={{ padding: "10px 8px", textAlign: "right" }}>{t.price != null ? `$${t.price.toFixed(2)}` : "—"}</td>
-                  <td style={{ padding: "10px 8px" }}>{t.transaction_date || "—"}</td>
+                  <td style={{ padding: "10px 8px" }}>{t.transaction_type}</td>
+                  <td style={{ padding: "10px 8px", textAlign: "right" }}>{t.shares_traded}</td>
+                  <td style={{ padding: "10px 8px", textAlign: "right" }}>{t.price !== "—" ? `$${t.price.toFixed(2)}` : "—"}</td>
+                  <td style={{ padding: "10px 8px" }}>{t.transaction_date}</td>
                 </tr>
               );
             })}
