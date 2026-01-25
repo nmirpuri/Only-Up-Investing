@@ -48,7 +48,7 @@ export default function TopTrades() {
 
   return (
     <div style={{ padding: "24px", fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif" }}>
-      <h1 style={{ fontSize: "2rem", marginBottom: "16px", color: "#1e3a8a" }}>Top Trades</h1>
+      <h1 style={{ fontSize: "2rem", marginBottom: "16px", color: "#1e3a8a" }}>See What People are Buying</h1>
 
       <p style={{ marginBottom: "24px", color: "#374151" }}>
         Showing insider trades for top executives. Followed people appear at the top.
