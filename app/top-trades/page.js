@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-
+ 
 export default function TopTradesPage() {
   const [trades, setTrades] = useState([]);
   const [loading, setLoading] = useState(true);
