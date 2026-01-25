@@ -34,6 +34,16 @@ export default function Navbar() {
       >
         My News
       </Link>
+      <Link
+  href="/top-trades"
+  style={{
+    textDecoration: "none",
+    fontWeight: 600,
+    color: "#2596be",
+  }}
+>
+  Top Trades
+</Link>
 
       <Link
         href="/signin"
