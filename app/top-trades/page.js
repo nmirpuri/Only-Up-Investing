@@ -2,152 +2,68 @@
 
 import { useEffect, useState } from "react";
 
-const FOLLOWED_PEOPLE = ["Tim Cook", "Elon Musk", "Pelosi", "Warren Buffett"];
-
 export default function TopTradesPage() {
-  const [ceoTrades, setCeoTrades] = useState([]);
-  const [politicianTrades, setPoliticianTrades] = useState([]);
-  const [activeTab, setActiveTab] = useState("CEOs");
+  const [trades, setTrades] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  async function fetchTrades() {
-    setLoading(true);
-    try {
-      const res = await fetch("/api/top-trades");
-      const data = await res.json();
-      setCeoTrades(data.ceos || []);
-      setPoliticianTrades(data.politicians || []);
-    } catch (err) {
-      console.error("Error fetching trades:", err);
-      setCeoTrades([]);
-      setPoliticianTrades([]);
-    }
-    setLoading(false);
-  }
-
   useEffect(() => {
-    fetchTrades();
-    const interval = setInterval(fetchTrades, 60 * 1000);
-    return () => clearInterval(interval);
+    fetch("/api/top-trades")
+      .then((res) => res.json())
+      .then((data) => {
+        setTrades(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error(err);
+        setLoading(false);
+      });
   }, []);
 
-  const tradesToShow = activeTab === "CEOs" ? ceoTrades : politicianTrades;
-
-  const typeColors = {
-    Buy: "#4ade80", // green
-    Sale: "#f87171", // red
-    Gift: "#fbbf24", // yellow
-    Tax: "#a78bfa", // purple
-    Derivative: "#60a5fa", // blue
-  };
-
   return (
-    <div style={{ padding: "32px", fontFamily: "Arial, sans-serif", background: "#f3f4f6", minHeight: "100vh" }}>
-      <h1 style={{ fontSize: "2.5rem", fontWeight: "700", marginBottom: "8px", color: "#1e293b" }}>
+    <div style={{ padding: "2rem", fontFamily: "sans-serif" }}>
+      <h1 style={{ fontSize: "2rem", fontWeight: 700, marginBottom: "1rem" }}>
         See What People Are Buying
       </h1>
-      <p style={{ color: "#475569", marginBottom: "24px", fontSize: "1rem" }}>
-        Insider trades for top executives and politicians. Followed people appear at the top.
+      <p style={{ marginBottom: "2rem", color: "#555" }}>
+        Insider trades for top executives. Followed people appear at the top.
       </p>
 
-      {/* Tabs */}
-      <div style={{ display: "flex", gap: "12px", marginBottom: "32px" }}>
-        {["CEOs", "Politicians"].map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            style={{
-              padding: "10px 20px",
-              borderRadius: "999px",
-              border: "none",
-              fontWeight: 600,
-              cursor: "pointer",
-              background: activeTab === tab ? "linear-gradient(90deg, #3b82f6, #06b6d4)" : "#e5e7eb",
-              color: activeTab === tab ? "#fff" : "#1e293b",
-              boxShadow: activeTab === tab ? "0 4px 12px rgba(0,0,0,0.15)" : "none",
-              transition: "all 0.3s ease",
-            }}
-          >
-            {tab}
-          </button>
-        ))}
+      <div style={{ display: "flex", gap: "1rem", marginBottom: "2rem" }}>
+        <button style={buttonStyle}>CEOs</button>
+        <button style={buttonStyle}>Politicians</button>
       </div>
 
       {loading ? (
-        <p style={{ color: "#475569" }}>Loading trades...</p>
-      ) : tradesToShow.length === 0 ? (
-        <p style={{ color: "#475569" }}>No trades available at the moment.</p>
+        <p>Loading trades...</p>
+      ) : trades.length === 0 ? (
+        <p>No trades available at the moment.</p>
       ) : (
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
-            gap: "20px",
+            gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+            gap: "1.5rem",
           }}
         >
-          {tradesToShow.map((trade, i) => (
-            <div
-              key={i}
-              style={{
-                padding: "20px",
-                borderRadius: "16px",
-                background: "#fff",
-                boxShadow: FOLLOWED_PEOPLE.includes(trade.name)
-                  ? "0 8px 20px rgba(59, 130, 246, 0.2)"
-                  : "0 4px 12px rgba(0,0,0,0.05)",
-                transition: "transform 0.3s ease, box-shadow 0.3s ease",
-                cursor: "pointer",
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-4px)")}
-              onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(0)")}
-            >
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "12px" }}>
-                <h2 style={{ fontSize: "1.25rem", fontWeight: 700 }}>{trade.name}</h2>
-                {FOLLOWED_PEOPLE.includes(trade.name) && (
-                  <span
-                    style={{
-                      background: "linear-gradient(90deg, #3b82f6, #06b6d4)",
-                      color: "#fff",
-                      fontSize: "0.75rem",
-                      fontWeight: 600,
-                      padding: "4px 10px",
-                      borderRadius: "999px",
-                    }}
-                  >
-                    Followed
-                  </span>
+          {trades.map((trade, idx) => (
+            <div key={idx} style={cardStyle}>
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <h2 style={{ margin: 0 }}>{trade.name}</h2>
+                {["Tim Cook", "Elon Musk"].includes(trade.name) && (
+                  <span style={followedBadge}>Followed</span>
                 )}
               </div>
-
-              <p style={{ color: "#475569", marginBottom: "6px" }}>
-                <strong>Role:</strong> {trade.role || "—"}
+              <p style={{ margin: "0.3rem 0", fontWeight: 600 }}>
+                {trade.symbol} • {trade.transactionType}
               </p>
-              <p style={{ color: "#475569", marginBottom: "6px" }}>
-                <strong>Ticker:</strong> {trade.symbol || "—"}
+              <p style={{ margin: "0.3rem 0" }}>
+                Shares: {trade.shares.toLocaleString()}
               </p>
-              <p style={{ color: "#475569", marginBottom: "6px" }}>
-                <strong>Type:</strong>{" "}
-                <span
-                  style={{
-                    color: "#fff",
-                    padding: "2px 6px",
-                    borderRadius: "6px",
-                    background: typeColors[trade.transactionType] || "#94a3b8",
-                    fontWeight: 600,
-                    fontSize: "0.75rem",
-                  }}
-                >
-                  {trade.transactionType || "—"}
-                </span>
+              <p style={{ margin: "0.3rem 0" }}>
+                Price: {trade.price ? `$${trade.price}` : "—"}
               </p>
-              <p style={{ color: "#475569", marginBottom: "6px" }}>
-                <strong>Shares:</strong> {trade.shares || "—"}
-              </p>
-              <p style={{ color: "#475569", marginBottom: "6px" }}>
-                <strong>Price:</strong> {trade.price || "—"}
-              </p>
-              <p style={{ color: "#475569", fontSize: "0.875rem" }}>
-                <strong>Date:</strong> {trade.date || "—"}
+              <p style={{ margin: "0.3rem 0", color: "#666" }}>
+                {new Date(trade.date).toLocaleDateString()}
               </p>
             </div>
           ))}
@@ -156,3 +72,30 @@ export default function TopTradesPage() {
     </div>
   );
 }
+
+const buttonStyle = {
+  padding: "0.5rem 1rem",
+  borderRadius: "999px",
+  border: "none",
+  background: "#2596be",
+  color: "white",
+  fontWeight: 600,
+  cursor: "pointer",
+  transition: "background 0.3s",
+};
+
+const cardStyle = {
+  background: "white",
+  padding: "1rem",
+  borderRadius: "1rem",
+  boxShadow: "0 5px 15px rgba(0,0,0,0.1)",
+  transition: "transform 0.2s",
+};
+
+const followedBadge = {
+  background: "#ffcc00",
+  padding: "0.2rem 0.5rem",
+  borderRadius: "0.5rem",
+  fontSize: "0.7rem",
+  fontWeight: 700,
+};
