@@ -1,10 +1,7 @@
-import fetch from "node-fetch";
-
 const FINNHUB_API_KEY = process.env.FINNHUB_API_KEY;
 
 export async function GET() {
   try {
-    // Example tickers you want to show trades for
     const tickers = ["AAPL", "TSLA", "MSFT", "AMZN"];
     let allTrades = [];
 
@@ -37,15 +34,15 @@ export async function GET() {
     // Filter out trades without names
     allTrades = allTrades.filter((trade) => trade.name);
 
-    // Optional: put "followed" people at the top
+    // Followed people at the top
     const followedPeople = ["Tim Cook", "Elon Musk"];
     allTrades.sort((a, b) => {
       if (followedPeople.includes(a.name)) return -1;
       if (followedPeople.includes(b.name)) return 1;
-      return new Date(b.date) - new Date(a.date); // newest first
+      return new Date(b.date) - new Date(a.date);
     });
 
-    // Take top 30 trades
+    // Top 30 trades
     allTrades = allTrades.slice(0, 30);
 
     return new Response(JSON.stringify(allTrades), {
