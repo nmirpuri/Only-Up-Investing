@@ -13,46 +13,23 @@ export default function Navbar() {
         borderBottom: "1px solid #e5e7eb",
       }}
     >
-      <Link
-        href="/"
-        style={{
-          textDecoration: "none",
-          fontWeight: 600,
-          color: "#2596be",
-        }}
-      >
+      <Link href="/" style={{ textDecoration: "none", fontWeight: 600, color: "#2596be" }}>
         My Portfolio
       </Link>
 
-      <Link
-        href="/news"
-        style={{
-          textDecoration: "none",
-          fontWeight: 600,
-          color: "#2596be",
-        }}
-      >
+      <Link href="/news" style={{ textDecoration: "none", fontWeight: 600, color: "#2596be" }}>
         My News
       </Link>
-      <Link
-  href="/top-trades"
-  style={{
-    textDecoration: "none",
-    fontWeight: 600,
-    color: "#2596be",
-  }}
->
-  Top Trades
-</Link>
 
-      <Link
-        href="/signin"
-        style={{
-          textDecoration: "none",
-          fontWeight: 600,
-          color: "#2596be",
-        }}
-      >
+      <Link href="/top-trades" style={{ textDecoration: "none", fontWeight: 600, color: "#2596be" }}>
+        Top Trades
+      </Link>
+
+      <Link href="/popular-trades" style={{ textDecoration: "none", fontWeight: 600, color: "#2596be" }}>
+        Popular Trades
+      </Link>
+
+      <Link href="/signin" style={{ textDecoration: "none", fontWeight: 600, color: "#2596be" }}>
         Sign In
       </Link>
     </nav>
