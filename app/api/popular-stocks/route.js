@@ -1,36 +1,36 @@
-import { NextResponse } from "next/server";
-
 export async function GET() {
-  const stocks = [
+  return Response.json([
     {
       name: "Apple",
-      ticker: "AAPL",
+      symbol: "AAPL",
       price: 182.34,
       change: 2.1,
-      watchers: 12400,
+      views: 12400,
+      domain: "apple.com",
     },
     {
       name: "Tesla",
-      ticker: "TSLA",
+      symbol: "TSLA",
       price: 238.9,
       change: -1.8,
-      watchers: 9800,
+      views: 9800,
+      domain: "tesla.com",
     },
     {
       name: "Nvidia",
-      ticker: "NVDA",
+      symbol: "NVDA",
       price: 512.67,
       change: 3.6,
-      watchers: 15300,
+      views: 15300,
+      domain: "nvidia.com",
     },
     {
       name: "Amazon",
-      ticker: "AMZN",
+      symbol: "AMZN",
       price: 168.22,
       change: 0.9,
-      watchers: 8700,
+      views: 8700,
+      domain: "amazon.com",
     },
-  ];
-
-  return NextResponse.json(stocks);
+  ]);
 }
