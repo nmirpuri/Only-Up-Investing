@@ -1,6 +1,15 @@
-export default async function PopularStocksPage() {
-  const res = await fetch("/api/popular-stocks", { cache: "no-store" })
-;
+import { headers } from "next/headers";
+
+export const dynamic = "force-dynamic";
+
+export default async function PopularTradesPage() {
+  const headersList = headers();
+  const host = headersList.get("host");
+  const protocol = process.env.NODE_ENV === "development" ? "http" : "https";
+
+  const res = await fetch(`${protocol}://${host}/api/popular-stocks`, {
+    cache: "no-store",
+  });
 
   const stocks = await res.json();
 
