@@ -1,7 +1,6 @@
 export default async function PopularStocksPage() {
-  const res = await fetch("http://localhost:3000/api/popular-stocks", {
-    cache: "no-store",
-  });
+  const res = await fetch("/api/popular-stocks", { cache: "no-store" })
+;
 
   const stocks = await res.json();
 
