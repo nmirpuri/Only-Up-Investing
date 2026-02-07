@@ -1,36 +1,49 @@
+import { NextResponse } from "next/server";
+
+const FINNHUB_API_KEY = process.env.FINNHUB_API_KEY;
+
+// A curated list of highly traded US stocks (keeps API calls reasonable)
+const SYMBOLS = [
+  "AAPL", "MSFT", "NVDA", "AMZN", "META",
+  "TSLA", "GOOGL", "AMD", "NFLX", "INTC",
+  "COIN", "BA", "JPM", "BAC", "DIS"
+];
+
 export async function GET() {
-  return Response.json([
-    {
-      name: "Apple",
-      symbol: "AAPL",
-      price: 182.34,
-      change: 2.1,
-      views: 12400,
-      domain: "apple.com",
-    },
-    {
-      name: "Tesla",
-      symbol: "TSLA",
-      price: 238.9,
-      change: -1.8,
-      views: 9800,
-      domain: "tesla.com",
-    },
-    {
-      name: "Nvidia",
-      symbol: "NVDA",
-      price: 512.67,
-      change: 3.6,
-      views: 15300,
-      domain: "nvidia.com",
-    },
-    {
-      name: "Amazon",
-      symbol: "AMZN",
-      price: 168.22,
-      change: 0.9,
-      views: 8700,
-      domain: "amazon.com",
-    },
-  ]);
+  try {
+    const results = await Promise.all(
+      SYMBOLS.map(async symbol => {
+        const quoteRes = await fetch(
+          `https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${FINNHUB_API_KEY}`
+        );
+        const profileRes = await fetch(
+          `https://finnhub.io/api/v1/stock/profile2?symbol=${symbol}&token=${FINNHUB_API_KEY}`
+        );
+
+        const quote = await quoteRes.json();
+        const profile = await profileRes.json();
+
+        return {
+          symbol,
+          name: profile.name,
+          price: quote.c,
+          change: quote.dp,
+          volume: quote.v,
+          logo: profile.logo,        // ✅ REAL LOGO
+          domain: profile.weburl,    // backup if needed
+        };
+      })
+    );
+
+    // Sort by volume (popular today)
+    const sorted = results
+      .filter(s => s.price)
+      .sort((a, b) => b.volume - a.volume)
+      .slice(0, 12);
+
+    return NextResponse.json(sorted);
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json({ error: "Failed to fetch popular stocks" }, { status: 500 });
+  }
 }
