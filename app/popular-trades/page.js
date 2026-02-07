@@ -5,11 +5,16 @@ import Link from "next/link";
 
 export default function PopularTrades() {
   const [stocks, setStocks] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetch("/api/popular-stocks")
       .then(res => res.json())
-      .then(data => setStocks(data));
+      .then(data => {
+        setStocks(data);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
   }, []);
 
   return (
@@ -18,8 +23,13 @@ export default function PopularTrades() {
         🔥 Popular Trades
       </h1>
       <p style={{ color: "#9ca3af", marginBottom: 32 }}>
-        Most viewed and traded stocks right now
+        Most actively traded stocks right now
       </p>
+
+      {/* Loading State */}
+      {loading && (
+        <p style={{ color: "#9ca3af" }}>Loading live market data...</p>
+      )}
 
       <div
         style={{
@@ -54,9 +64,15 @@ export default function PopularTrades() {
               {/* Header */}
               <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                 <img
-                  src={`https://logo.clearbit.com/${stock.domain}`}
+                  src={stock.logo || "/logo-placeholder.png"}
                   alt={stock.name}
-                  style={{ width: 40, height: 40, borderRadius: 8 }}
+                  style={{
+                    width: 42,
+                    height: 42,
+                    borderRadius: 10,
+                    objectFit: "contain",
+                    background: "#020617",
+                  }}
                 />
                 <div>
                   <h3 style={{ margin: 0 }}>{stock.name}</h3>
@@ -66,7 +82,9 @@ export default function PopularTrades() {
 
               {/* Price */}
               <div style={{ marginTop: 20 }}>
-                <h2 style={{ margin: 0 }}>${stock.price}</h2>
+                <h2 style={{ margin: 0 }}>
+                  ${stock.price?.toFixed(2)}
+                </h2>
                 <span
                   style={{
                     color: stock.change > 0 ? "#22c55e" : "#ef4444",
@@ -74,7 +92,7 @@ export default function PopularTrades() {
                   }}
                 >
                   {stock.change > 0 ? "+" : ""}
-                  {stock.change}%
+                  {stock.change?.toFixed(2)}%
                 </span>
               </div>
 
@@ -88,8 +106,8 @@ export default function PopularTrades() {
                   color: "#9ca3af",
                 }}
               >
-                <span>👀 {stock.views.toLocaleString()}</span>
-                <span>⭐ Watch</span>
+                <span>📊 Vol {stock.volume?.toLocaleString()}</span>
+                <span>⭐ View</span>
               </div>
             </div>
           </Link>
