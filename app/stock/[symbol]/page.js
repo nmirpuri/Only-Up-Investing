@@ -74,7 +74,7 @@ export default function StockPage() {
           gap: 20,
         }}
       >
-        <Stat label="Market Cap" value={`$${(stock.marketCap / 1e9).toFixed(2)}B`} />
+       <Statlabel="Market Cap" value={stock.marketCap? `$${(stock.marketCap / 1e9).toFixed(2)}B`: "N/A"}/>
         <Stat label="Day High" value={`$${stock.high}`} />
         <Stat label="Day Low" value={`$${stock.low}`} />
         <Stat label="Volume" value={stock.volume.toLocaleString()} />
