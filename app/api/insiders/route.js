@@ -1,58 +1,42 @@
+import { NextResponse } from "next/server";
+
 const FINNHUB_API_KEY = process.env.FINNHUB_API_KEY;
+
+// Curated high-interest companies
+const SYMBOLS = ["AAPL", "MSFT", "TSLA", "NVDA", "AMZN", "META", "GOOGL"];
 
 export async function GET() {
   try {
-    const tickers = ["AAPL", "TSLA", "MSFT", "AMZN"];
-    let allTrades = [];
+    const trades = [];
 
-    for (let symbol of tickers) {
+    for (const symbol of SYMBOLS) {
       const res = await fetch(
         `https://finnhub.io/api/v1/stock/insider-transactions?symbol=${symbol}&token=${FINNHUB_API_KEY}`
       );
+
       const data = await res.json();
-      if (data.data) {
-        allTrades = allTrades.concat(
-          data.data.map((trade) => ({
-            name: trade.name,
-            symbol: trade.symbol,
-            shares: trade.share,
-            transactionType:
-              trade.transactionCode === "S"
-                ? "Sale"
-                : trade.transactionCode === "G"
-                ? "Gift"
-                : trade.transactionCode === "P"
-                ? "Purchase"
-                : trade.transactionCode,
-            price: trade.transactionPrice,
-            date: trade.transactionDate,
-          }))
-        );
-      }
+
+      if (!data?.data) continue;
+
+      data.data.forEach((t) => {
+        trades.push({
+          name: t.name,
+          symbol,
+          type: t.transactionType === "P" ? "BUY" : "SELL",
+          shares: t.share,
+          price: t.transactionPrice,
+          date: t.transactionDate,
+        });
+      });
     }
 
-    // Filter out trades without names
-    allTrades = allTrades.filter((trade) => trade.name);
-
-    // Followed people at the top
-    const followedPeople = ["Tim Cook", "Elon Musk"];
-    allTrades.sort((a, b) => {
-      if (followedPeople.includes(a.name)) return -1;
-      if (followedPeople.includes(b.name)) return 1;
-      return new Date(b.date) - new Date(a.date);
-    });
-
-    // Top 30 trades
-    allTrades = allTrades.slice(0, 30);
-
-    return new Response(JSON.stringify(allTrades), {
-      headers: { "Content-Type": "application/json" },
-    });
-  } catch (error) {
-    console.error(error);
-    return new Response(
-      JSON.stringify({ error: "Failed to fetch insider trades" }),
-      { status: 500, headers: { "Content-Type": "application/json" } }
+    return NextResponse.json(
+      trades
+        .filter(t => t.shares && t.price)
+        .sort((a, b) => new Date(b.date) - new Date(a.date))
+        .slice(0, 30)
     );
+  } catch (e) {
+    return NextResponse.json({ error: "Failed to fetch insider trades" }, { status: 500 });
   }
 }
