@@ -16,17 +16,20 @@ export async function GET(req, { params }) {
     const quote = await quoteRes.json();
     const profile = await profileRes.json();
 
-    return NextResponse.json({
-      symbol,
-      name: profile.name,
-      logo: profile.logo,
-      price: quote.c,
-      change: quote.dp,
-      high: quote.h,
-      low: quote.l,
-      volume: quote.v,
-      marketCap: profile.marketCapitalization * 1_000_000,
-    });
+   return NextResponse.json({
+  symbol,
+  name: profile.name || symbol,
+  logo: profile.logo || null,
+  price: quote.c ?? 0,
+  change: quote.dp ?? 0,
+  high: quote.h ?? 0,
+  low: quote.l ?? 0,
+  volume: quote.v ?? 0,
+  marketCap: profile.marketCapitalization
+    ? profile.marketCapitalization * 1_000_000
+    : null,
+});
+
   } catch (error) {
     return NextResponse.json({ error: "Failed to fetch stock" }, { status: 500 });
   }
