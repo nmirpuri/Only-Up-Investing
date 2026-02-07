@@ -1,92 +1,100 @@
-'use client'
+"use client";
 
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useEffect, useState } from "react";
 
-export default function TopTrades() {
-  const [filter, setFilter] = useState('ALL')
-  const [trades, setTrades] = useState([])
-  const router = useRouter()
+const API_KEY = process.env.NEXT_PUBLIC_FINNHUB_API_KEY;
+
+export default function TopTradesPage() {
+  const [trades, setTrades] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function load() {
-      const [ceos, pols] = await Promise.all([
-        fetch('/api/top-trades/ceos').then(r => r.json()),
-        fetch('/api/top-trades/politicians').then(r => r.json()),
-      ])
-      setTrades([...ceos, ...pols])
-    }
-    load()
-  }, [])
+    const fetchTrades = async () => {
+      try {
+        const res = await fetch(
+          `https://finnhub.io/api/v1/stock/insider-transactions?symbol=AAPL&token=${API_KEY}`
+        );
+        const data = await res.json();
 
-  const filtered =
-    filter === 'ALL' ? trades : trades.filter(t => t.category === filter)
+        setTrades(data.data?.slice(0, 10) || []);
+      } catch (err) {
+        console.error("Failed to fetch insider trades", err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-zinc-900 to-black text-white px-6 py-14">
-      <div className="max-w-7xl mx-auto mb-10">
-        <h1 className="text-5xl font-extrabold">Top Insider Trades</h1>
-        <p className="text-zinc-400 mt-3">
-          Real trades from CEOs and U.S. politicians — disclosed and tracked.
-        </p>
-      </div>
+    fetchTrades();
+  }, []);
 
-      {/* FILTERS */}
-      <div className="max-w-7xl mx-auto flex gap-4 mb-10">
-        <Filter label="All" active={filter === 'ALL'} onClick={() => setFilter('ALL')} />
-        <Filter label="CEO" color="blue" active={filter === 'CEO'} onClick={() => setFilter('CEO')} />
-        <Filter label="Politician" color="orange" active={filter === 'Politician'} onClick={() => setFilter('Politician')} />
-      </div>
-
-      {/* CARDS */}
-      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {filtered.map((t, i) => {
-          const buy = t.action === 'BUY'
-          return (
-            <button
-              key={i}
-              onClick={() => router.push(`/stock/${t.symbol}`)}
-              className={`rounded-3xl p-6 border backdrop-blur-xl transition-all
-                hover:scale-[1.04] hover:shadow-2xl
-                ${buy ? 'border-emerald-500/40 bg-emerald-500/10' : 'border-red-500/40 bg-red-500/10'}`}
-            >
-              <h3 className="text-xl font-bold">{t.person}</h3>
-              <p className="text-sm text-zinc-400 mb-3">{t.role}</p>
-
-              <div className="text-4xl font-extrabold mb-2">{t.symbol}</div>
-
-              <div className="flex justify-between text-sm mb-3">
-                <span className={buy ? 'text-emerald-400' : 'text-red-400'}>
-                  {t.action}
-                </span>
-                <span>${Number(t.amountUSD || 0).toLocaleString()}</span>
-              </div>
-
-              <p className="text-xs text-zinc-400">{t.date}</p>
-              <p className="text-xs mt-2">🔥 {t.signal}</p>
-            </button>
-          )
-        })}
-      </div>
-    </div>
-  )
-}
-
-function Filter({ label, active, onClick, color }) {
-  const colors = {
-    blue: 'bg-blue-500 shadow-blue-500/40',
-    orange: 'bg-orange-500 shadow-orange-500/40',
+  if (loading) {
+    return <div className="p-8 text-gray-400">Loading insider trades…</div>;
   }
 
   return (
-    <button
-      onClick={onClick}
-      className={`px-6 py-2 rounded-full font-semibold transition-all
-        ${active
-          ? `${colors[color]} text-black shadow-lg`
-          : 'bg-white/10 hover:bg-white/20 text-white'}`}
-    >
-      {label}
-    </button>
-  )
+    <div className="p-8">
+      <h1 className="text-3xl font-bold mb-2">Top Insider Trades</h1>
+      <p className="text-gray-400 mb-6">
+        Real insider transactions disclosed via SEC filings (Finnhub)
+      </p>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {trades.map((trade, idx) => (
+          <div
+            key={idx}
+            className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 hover:border-blue-500 transition"
+          >
+            <div className="flex items-center gap-4 mb-4">
+              <img
+                src={`https://logo.clearbit.com/${trade.symbol?.toLowerCase()}.com`}
+                className="w-10 h-10 rounded"
+                alt={trade.symbol}
+                onError={(e) =>
+                  (e.currentTarget.src =
+                    "https://via.placeholder.com/40")
+                }
+              />
+              <div>
+                <p className="font-semibold">
+                  {trade.name || "Insider"}
+                </p>
+                <p className="text-sm text-gray-400">
+                  {trade.symbol}
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-1 text-sm">
+              <p>
+                <span className="text-gray-400">Action:</span>{" "}
+                <span
+                  className={`font-semibold ${
+                    trade.transactionType === "P"
+                      ? "text-green-400"
+                      : "text-red-400"
+                  }`}
+                >
+                  {trade.transactionType === "P" ? "BUY" : "SELL"}
+                </span>
+              </p>
+
+              <p>
+                <span className="text-gray-400">Shares:</span>{" "}
+                {trade.share?.toLocaleString() || "—"}
+              </p>
+
+              <p>
+                <span className="text-gray-400">Price:</span>{" "}
+                ${trade.transactionPrice || "—"}
+              </p>
+            </div>
+
+            <div className="mt-4 text-xs text-gray-500">
+              Trade Date: {trade.transactionDate}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 }
