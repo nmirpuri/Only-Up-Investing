@@ -22,7 +22,7 @@ export default function Navbar() {
       </Link>
 
       <Link href="/top-trades" style={{ textDecoration: "none", fontWeight: 600, color: "#2596be" }}>
-        Top Trades
+         
       </Link>
 
       <Link href="/popular-trades" style={{ textDecoration: "none", fontWeight: 600, color: "#2596be" }}>
@@ -30,7 +30,7 @@ export default function Navbar() {
       </Link>
 
       <Link href="/signin" style={{ textDecoration: "none", fontWeight: 600, color: "#2596be" }}>
-        Sign In
+         
       </Link>
     </nav>
   );
