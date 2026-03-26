@@ -238,7 +238,8 @@ export default function Home() {
       <div style={styles.portfolioGrid}>
         {portfolio.map((stock) => {
           const gain = (stock.currentPrice - stock.buyPrice) * stock.shares;
-
+          const percentage = ((stock.currentPrice - stock.buyPrice) * stock.shares) / (stock.shares * stock.buyPrice);
+           
           return (
             <div key={stock.id} style={styles.stockCard}>
               <div style={styles.stockHeader}>
@@ -251,6 +252,9 @@ export default function Home() {
               <p style={styles.stockText}>Shares: {stock.shares}</p>
               <p style={styles.stockText}>
                 Current: ${stock.currentPrice ? stock.currentPrice.toFixed(2) : "—"}
+              </p>
+              <p style={styles.stockText}>
+                Percentage: ${Math.abs(percentage).toFixed(2)}
               </p>
               <p style={{ color: gain >= 0 ? "#22c55e" : "#f87171", fontWeight: "bold" }}>
                 {gain >= 0 ? "+" : "-"}${Math.abs(gain).toFixed(2)}
