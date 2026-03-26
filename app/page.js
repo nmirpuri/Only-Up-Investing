@@ -141,6 +141,7 @@ export default function Home() {
     setSymbol("");
     setBuyPrice("");
     setShares("");
+    setBuyDate("");
   }
 
   /* ============================
