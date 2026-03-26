@@ -254,7 +254,7 @@ export default function Home() {
                 Current: ${stock.currentPrice ? stock.currentPrice.toFixed(2) : "—"}
               </p>
               <p style={styles.stockText}>
-                Percentage: ${Math.abs(percentage).toFixed(2)}
+                Percentage: {Math.abs(percentage).toFixed(2) * 100}%
               </p>
               <p style={{ color: gain >= 0 ? "#22c55e" : "#f87171", fontWeight: "bold" }}>
                 {gain >= 0 ? "+" : "-"}${Math.abs(gain).toFixed(2)}
