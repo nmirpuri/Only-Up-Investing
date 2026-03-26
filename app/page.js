@@ -54,6 +54,7 @@ export default function Home() {
   const [portfolio, setPortfolio] = useState([]);
   const [error, setError] = useState("");
   const [loadingPrices, setLoadingPrices] = useState(false);
+  const [buyDate, setBuyDate] = useState("");
 
   /* ============================
      INIT ANONYMOUS USER
@@ -133,6 +134,7 @@ export default function Home() {
         buyPrice: Number(buyPrice),
         shares: Number(shares),
         currentPrice: price,
+        buyDate: buyDate || null,
       },
     ]);
 
@@ -218,9 +220,17 @@ export default function Home() {
           onChange={(e) => setShares(e.target.value)}
           style={styles.input}
         />
+        <input
+        placeholder="Date (optional)"
+        type="date"
+        value={buyDate}
+        onChange={(e) => setBuyDate(e.target.value)}
+        style={styles.input}
+        />
         <button onClick={addStock} style={styles.button}>
           Add
         </button>
+         
         {error && <p style={styles.error}>{error}</p>}
       </div>
 
@@ -239,7 +249,14 @@ export default function Home() {
         {portfolio.map((stock) => {
           const gain = (stock.currentPrice - stock.buyPrice) * stock.shares;
           const percentage = ((stock.currentPrice - stock.buyPrice) * stock.shares) / (stock.shares * stock.buyPrice);
-           
+          let daysHeld = null;
+
+if (stock.buyDate) {
+  const today = new Date();
+  const bought = new Date(stock.buyDate);
+  const diffTime = today - bought;
+  daysHeld = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+}
           return (
             <div key={stock.id} style={styles.stockCard}>
               <div style={styles.stockHeader}>
@@ -259,6 +276,9 @@ export default function Home() {
               <p style={{ color: gain >= 0 ? "#22c55e" : "#f87171", fontWeight: "bold" }}>
                 {gain >= 0 ? "+" : "-"}${Math.abs(gain).toFixed(2)}
               </p>
+               {daysHeld !== null && (
+  <p style={styles.stockText}>Days Held: {daysHeld}</p>
+)}
             </div>
           );
         })}
