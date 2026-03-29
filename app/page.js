@@ -249,7 +249,8 @@ export default function Home() {
       <div style={styles.portfolioGrid}>
         {portfolio.map((stock) => {
           const gain = (stock.currentPrice - stock.buyPrice) * stock.shares;
-          const percentage = ((stock.currentPrice - stock.buyPrice) * stock.shares) / (stock.shares * stock.buyPrice);
+          const perc = ((stock.currentPrice - stock.buyPrice) * stock.shares) / (stock.shares * stock.buyPrice);
+          const percentage = perc * 100;
           let daysHeld = null;
 
 if (stock.buyDate) {
@@ -272,7 +273,7 @@ if (stock.buyDate) {
                 Current: ${stock.currentPrice ? stock.currentPrice.toFixed(2) : "—"}
               </p>
               <p style={styles.stockText}>
-                Percentage: {Math.abs(percentage).toFixed(2) * 100}%
+                Percentage: {Math.abs(percentage).toFixed(2)}%
               </p>
               <p style={{ color: gain >= 0 ? "#22c55e" : "#f87171", fontWeight: "bold" }}>
                 {gain >= 0 ? "+" : "-"}${Math.abs(gain).toFixed(2)}
