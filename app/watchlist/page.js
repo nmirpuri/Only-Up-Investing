@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 
 /* ============================
-   STYLES (reuse yours mostly)
+   STYLES
 ============================ */
 const styles = {
   container: {
@@ -15,12 +15,44 @@ const styles = {
   title: { fontSize: 36, marginBottom: 5 },
   subtitle: { color: "#666", marginBottom: 10 },
   card: { background: "#f9f9f9", padding: 20, borderRadius: 10, marginBottom: 25 },
-  input: { width: "100%", padding: 10, marginBottom: 10, borderRadius: 6, border: "1px solid #ddd" },
-  button: { width: "100%", padding: 12, background: "black", color: "white", border: "none", borderRadius: 6, cursor: "pointer" },
-  grid: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 20 },
-  stockCard: { background: "#fff", padding: 15, borderRadius: 8, boxShadow: "0 2px 5px rgba(0,0,0,0.05)" },
-  row: { display: "flex", justifyContent: "space-between", alignItems: "center" },
-  deleteBtn: { background: "transparent", border: "none", cursor: "pointer", fontSize: 16 },
+  input: {
+    width: "100%",
+    padding: 10,
+    marginBottom: 10,
+    borderRadius: 6,
+    border: "1px solid #ddd",
+  },
+  button: {
+    width: "100%",
+    padding: 12,
+    background: "black",
+    color: "white",
+    border: "none",
+    borderRadius: 6,
+    cursor: "pointer",
+  },
+  grid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+    gap: 20,
+  },
+  stockCard: {
+    background: "#fff",
+    padding: 15,
+    borderRadius: 8,
+    boxShadow: "0 2px 5px rgba(0,0,0,0.05)",
+  },
+  row: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  deleteBtn: {
+    background: "transparent",
+    border: "none",
+    cursor: "pointer",
+    fontSize: 16,
+  },
 };
 
 /* ============================
@@ -32,7 +64,7 @@ export default function Watchlist() {
   const [loading, setLoading] = useState(false);
 
   /* ============================
-     LOAD FROM LOCAL STORAGE
+     LOAD
   ============================ */
   useEffect(() => {
     const saved = localStorage.getItem("onlyup-watchlist");
@@ -68,6 +100,7 @@ export default function Watchlist() {
     if (!symbol) return;
 
     setLoading(true);
+
     const price = await fetchPrice(symbol.toUpperCase());
 
     if (!price) {
@@ -80,7 +113,9 @@ export default function Watchlist() {
       {
         id: crypto.randomUUID(),
         symbol: symbol.toUpperCase(),
-        price,
+        initialPrice: price,
+        currentPrice: price,
+        targetPrice: null,
       },
     ]);
 
@@ -104,7 +139,7 @@ export default function Watchlist() {
         const price = await fetchPrice(stock.symbol);
         return {
           ...stock,
-          price: price ?? stock.price,
+          currentPrice: price ?? stock.currentPrice,
         };
       })
     );
@@ -143,18 +178,82 @@ export default function Watchlist() {
       </button>
 
       <div style={styles.grid}>
-        {watchlist.map((stock) => (
-          <div key={stock.id} style={styles.stockCard}>
-            <div style={styles.row}>
-              <strong>{stock.symbol}</strong>
-              <button onClick={() => removeStock(stock.id)} style={styles.deleteBtn}>
-                ✕
-              </button>
-            </div>
+        {watchlist.map((stock) => {
+          const change = stock.currentPrice - stock.initialPrice;
+          const percentChange = (change / stock.initialPrice) * 100;
 
-            <p>Price: ${stock.price?.toFixed(2) || "—"}</p>
-          </div>
-        ))}
+          const targetDiff =
+            stock.targetPrice !== null
+              ? stock.targetPrice - stock.currentPrice
+              : null;
+
+          return (
+            <div key={stock.id} style={styles.stockCard}>
+              <div style={styles.row}>
+                <strong>{stock.symbol}</strong>
+                <button
+                  onClick={() => removeStock(stock.id)}
+                  style={styles.deleteBtn}
+                >
+                  ✕
+                </button>
+              </div>
+
+              <p>Added At: ${stock.initialPrice.toFixed(2)}</p>
+              <p>Current: ${stock.currentPrice?.toFixed(2) || "—"}</p>
+
+              <p style={{ color: change >= 0 ? "green" : "red" }}>
+                {change >= 0 ? "+" : "-"}${Math.abs(change).toFixed(2)} (
+                {percentChange.toFixed(2)}%)
+              </p>
+
+              {/* TARGET INPUT */}
+              <input
+                type="number"
+                placeholder="Target Price"
+                value={stock.targetPrice || ""}
+                onChange={(e) => {
+                  const value = e.target.value;
+
+                  setWatchlist((prev) =>
+                    prev.map((s) =>
+                      s.id === stock.id
+                        ? {
+                            ...s,
+                            targetPrice: value ? Number(value) : null,
+                          }
+                        : s
+                    )
+                  );
+                }}
+                style={{
+                  width: "100%",
+                  marginTop: 10,
+                  padding: 8,
+                  borderRadius: 6,
+                  border: "1px solid #ddd",
+                }}
+              />
+
+              {/* TARGET INFO */}
+              {stock.targetPrice && (
+                <p>
+                  Target: ${stock.targetPrice.toFixed(2)} <br />
+                  {targetDiff > 0
+                    ? `${targetDiff.toFixed(2)} away ↑`
+                    : `${Math.abs(targetDiff).toFixed(2)} past ↓`}
+                </p>
+              )}
+
+              {/* TARGET HIT */}
+              {targetDiff !== null && targetDiff <= 0 && (
+                <p style={{ color: "green", fontWeight: "bold" }}>
+                  🎯 Target Hit!
+                </p>
+              )}
+            </div>
+          );
+        })}
       </div>
     </main>
   );
