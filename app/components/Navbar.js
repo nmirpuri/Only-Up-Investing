@@ -29,6 +29,9 @@ export default function Navbar() {
         Popular Trades
       </Link>
 
+      <Link href="watchlist" style={{ textDecoration: "none", fontWeight: 600, color: "#2596be" }}>
+        Watchlist
+      </Link>
       <Link href="/signin" style={{ textDecoration: "none", fontWeight: 600, color: "#2596be" }}>
          
       </Link>
