@@ -12,6 +12,7 @@ const styles = {
     margin: "40px auto",
     fontFamily: "system-ui",
   },
+
   title: { fontSize: 34, marginBottom: 5 },
   subtitle: { color: "#666", marginBottom: 20 },
 
@@ -41,20 +42,23 @@ const styles = {
   },
 
   folder: {
-    marginBottom: 30,
+    marginBottom: 25,
+    borderBottom: "1px solid #eee",
+    paddingBottom: 10,
   },
 
   folderHeader: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 10,
+    cursor: "pointer",
   },
 
   grid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
     gap: 15,
+    marginTop: 15,
   },
 
   stockCard: {
@@ -84,6 +88,7 @@ export default function Watchlist() {
   const [newFolder, setNewFolder] = useState("");
   const [symbol, setSymbol] = useState("");
   const [selectedFolder, setSelectedFolder] = useState("");
+  const [activeFolder, setActiveFolder] = useState(null);
   const [loading, setLoading] = useState(false);
 
   /* ============================
@@ -112,23 +117,30 @@ export default function Watchlist() {
   }
 
   /* ============================
-     CREATE FOLDER
+     FOLDER LOGIC
   ============================ */
   function addFolder() {
     if (!newFolder) return;
 
-    const folder = {
-      id: crypto.randomUUID(),
-      name: newFolder,
-      stocks: [],
-    };
+    setFolders((prev) => [
+      ...prev,
+      {
+        id: crypto.randomUUID(),
+        name: newFolder,
+        stocks: [],
+      },
+    ]);
 
-    setFolders((prev) => [...prev, folder]);
     setNewFolder("");
   }
 
   function deleteFolder(id) {
     setFolders((prev) => prev.filter((f) => f.id !== id));
+    if (activeFolder === id) setActiveFolder(null);
+  }
+
+  function toggleFolder(id) {
+    setActiveFolder((prev) => (prev === id ? null : id));
   }
 
   /* ============================
@@ -157,6 +169,7 @@ export default function Watchlist() {
                   symbol: symbol.toUpperCase(),
                   initialPrice: price,
                   currentPrice: price,
+                  targetPrice: null,
                 },
               ],
             }
@@ -199,7 +212,6 @@ export default function Watchlist() {
             };
           })
         );
-
         return { ...folder, stocks };
       })
     );
@@ -268,46 +280,107 @@ export default function Watchlist() {
       {/* FOLDERS */}
       {folders.map((folder) => (
         <div key={folder.id} style={styles.folder}>
-          <div style={styles.folderHeader}>
-            <h2>{folder.name}</h2>
+          <div
+            style={styles.folderHeader}
+            onClick={() => toggleFolder(folder.id)}
+          >
+            <h2>
+              {activeFolder === folder.id ? "▼" : "▶"} {folder.name}
+            </h2>
+
             <button
-              onClick={() => deleteFolder(folder.id)}
+              onClick={(e) => {
+                e.stopPropagation();
+                deleteFolder(folder.id);
+              }}
               style={styles.deleteBtn}
             >
               ✕
             </button>
           </div>
 
-          <div style={styles.grid}>
-            {folder.stocks.map((stock) => {
-              const change = stock.currentPrice - stock.initialPrice;
-              const percent = (change / stock.initialPrice) * 100;
+          {activeFolder === folder.id && (
+            <div style={styles.grid}>
+              {folder.stocks.map((stock) => {
+                const change = stock.currentPrice - stock.initialPrice;
+                const percent = (change / stock.initialPrice) * 100;
+                const targetHit =
+                  stock.targetPrice &&
+                  stock.currentPrice >= stock.targetPrice;
 
-              return (
-                <div key={stock.id} style={styles.stockCard}>
-                  <div style={styles.row}>
-                    <strong>{stock.symbol}</strong>
-                    <button
-                      onClick={() =>
-                        removeStock(folder.id, stock.id)
-                      }
-                      style={styles.deleteBtn}
-                    >
-                      ✕
-                    </button>
+                return (
+                  <div key={stock.id} style={styles.stockCard}>
+                    <div style={styles.row}>
+                      <strong>{stock.symbol}</strong>
+                      <button
+                        onClick={() =>
+                          removeStock(folder.id, stock.id)
+                        }
+                        style={styles.deleteBtn}
+                      >
+                        ✕
+                      </button>
+                    </div>
+
+                    <p>Added: ${stock.initialPrice.toFixed(2)}</p>
+                    <p>Now: ${stock.currentPrice?.toFixed(2) || "—"}</p>
+
+                    <p style={{ color: change >= 0 ? "green" : "red" }}>
+                      {change >= 0 ? "+" : "-"}$
+                      {Math.abs(change).toFixed(2)} (
+                      {percent.toFixed(2)}%)
+                    </p>
+
+                    {/* MINI CHART */}
+                    <div style={{ marginTop: 10 }}>
+                      {/* Replace this with dynamic chart widget later if needed */}
+                      <small style={{ color: "#999" }}>
+                        Chart preview
+                      </small>
+                    </div>
+
+                    {/* TARGET INPUT */}
+                    <input
+                      type="number"
+                      placeholder="Target Price"
+                      value={stock.targetPrice || ""}
+                      onChange={(e) => {
+                        const value = e.target.value;
+
+                        setFolders((prev) =>
+                          prev.map((f) =>
+                            f.id === folder.id
+                              ? {
+                                  ...f,
+                                  stocks: f.stocks.map((s) =>
+                                    s.id === stock.id
+                                      ? {
+                                          ...s,
+                                          targetPrice: value
+                                            ? Number(value)
+                                            : null,
+                                        }
+                                      : s
+                                  ),
+                                }
+                              : f
+                          )
+                        );
+                      }}
+                      style={styles.input}
+                    />
+
+                    {/* TARGET HIT */}
+                    {targetHit && (
+                      <p style={{ color: "green", fontWeight: "bold" }}>
+                        🎯 Target Hit!
+                      </p>
+                    )}
                   </div>
-
-                  <p>Added: ${stock.initialPrice.toFixed(2)}</p>
-                  <p>Now: ${stock.currentPrice?.toFixed(2) || "—"}</p>
-
-                  <p style={{ color: change >= 0 ? "green" : "red" }}>
-                    {change >= 0 ? "+" : "-"}${Math.abs(change).toFixed(2)} (
-                    {percent.toFixed(2)}%)
-                  </p>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       ))}
     </main>
