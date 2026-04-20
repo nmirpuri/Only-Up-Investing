@@ -31,6 +31,15 @@ const styles = {
     border: "1px solid #ddd",
   },
 
+  textarea: {
+    width: "100%",
+    padding: 8,
+    marginTop: 10,
+    borderRadius: 6,
+    border: "1px solid #ddd",
+    resize: "vertical",
+  },
+
   button: {
     width: "100%",
     padding: 10,
@@ -170,6 +179,7 @@ export default function Watchlist() {
                   initialPrice: price,
                   currentPrice: price,
                   targetPrice: null,
+                  comment: "",
                 },
               ],
             }
@@ -304,9 +314,16 @@ export default function Watchlist() {
               {folder.stocks.map((stock) => {
                 const change = stock.currentPrice - stock.initialPrice;
                 const percent = (change / stock.initialPrice) * 100;
-                const targetHit =
-                  stock.targetPrice &&
-                  stock.currentPrice >= stock.targetPrice;
+
+                const targetDiff =
+                  stock.targetPrice !== null
+                    ? stock.targetPrice - stock.currentPrice
+                    : null;
+
+                const targetPercent =
+                  stock.targetPrice !== null
+                    ? (targetDiff / stock.currentPrice) * 100
+                    : null;
 
                 return (
                   <div key={stock.id} style={styles.stockCard}>
@@ -330,14 +347,6 @@ export default function Watchlist() {
                       {Math.abs(change).toFixed(2)} (
                       {percent.toFixed(2)}%)
                     </p>
-
-                    {/* MINI CHART */}
-                    <div style={{ marginTop: 10 }}>
-                      {/* Replace this with dynamic chart widget later if needed */}
-                      <small style={{ color: "#999" }}>
-                        Chart preview
-                      </small>
-                    </div>
 
                     {/* TARGET INPUT */}
                     <input
@@ -370,12 +379,42 @@ export default function Watchlist() {
                       style={styles.input}
                     />
 
-                    {/* TARGET HIT */}
-                    {targetHit && (
-                      <p style={{ color: "green", fontWeight: "bold" }}>
-                        🎯 Target Hit!
+                    {/* TARGET INFO */}
+                    {stock.targetPrice && (
+                      <p>
+                        Target: ${stock.targetPrice.toFixed(2)} <br />
+                        {targetDiff > 0
+                          ? `${targetDiff.toFixed(2)} away (${targetPercent.toFixed(
+                              2
+                            )}%)`
+                          : "🎯 Target Hit!"}
                       </p>
                     )}
+
+                    {/* COMMENT BOX */}
+                    <textarea
+                      placeholder="Add notes / thoughts..."
+                      value={stock.comment || ""}
+                      onChange={(e) => {
+                        const value = e.target.value;
+
+                        setFolders((prev) =>
+                          prev.map((f) =>
+                            f.id === folder.id
+                              ? {
+                                  ...f,
+                                  stocks: f.stocks.map((s) =>
+                                    s.id === stock.id
+                                      ? { ...s, comment: value }
+                                      : s
+                                  ),
+                                }
+                              : f
+                          )
+                        );
+                      }}
+                      style={styles.textarea}
+                    />
                   </div>
                 );
               })}
